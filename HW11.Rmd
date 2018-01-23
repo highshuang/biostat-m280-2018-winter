@@ -17,10 +17,12 @@ wc -l /home/m280-data/hw1/merge-geno.fam
 
 wc -l /home/m280-data/hw1/merge-geno.bim
 #8348674 
+#jjjj#hhh
 ```
 
 2. Which chromosomes does this data set contain? How many SNPs are in each chromosome?
 
+Here are chromosomes:
 ```{bash}
 awk '{a[$1]}END{for(b in a){print b}}' /home/m280-data/hw1/merge-geno.bim |sort -n
 
