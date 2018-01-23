@@ -16,7 +16,7 @@ wc -l /home/m280-data/hw1/merge-geno.fam
 #959
 
 wc -l /home/m280-data/hw1/merge-geno.bim
-#8348674 hhhhhhhhhh
+#8348674 
 ```
 
 2. Which chromosomes does this data set contain? How many SNPs are in each chromosome?
