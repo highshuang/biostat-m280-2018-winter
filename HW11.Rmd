@@ -17,7 +17,7 @@ wc -l /home/m280-data/hw1/merge-geno.fam
 
 wc -l /home/m280-data/hw1/merge-geno.bim
 #8348674 
-#jjjj#hhh
+
 ```
 
 2. Which chromosomes does this data set contain? How many SNPs are in each chromosome?
@@ -41,17 +41,23 @@ awk 'BEGIN{count=0}{if($1==3 && $4 >= 47892180 && $4 <= 48130769) count++}END{pr
 
 4-1 Reformat Data set
 ```{bash}
-awk 'BEGIN{print "    2.40  = FILE FORMAT VERSION NUMBER.\n8348674  = NUMBER OF SNPS LISTED HERE."}{OFS = ","}{print $2,$1,$4}' /home/m280-data/hw1/merge-geno.bim > reformat_merge-geno.txt
+awk 'BEGIN{print "    2.40  = FILE FORMAT VERSION NUMBER.\n8348674  = NUMBER OF SNPS LISTED HERE."}{OFS = ","}{print $2, $1 ,$4}' /home/m280-data/hw1/merge-geno.bim > reformat_merge-geno.txt
 head reformat_merge-geno.txt
 
 ```
 4-2 Reformat Data set
 
-```{bash} 
-#g means global
-sed 's/^0/ /g' /home/m280-data/hw1/merge-geno.fam | sed 's/T2DG//g'|awk '{OFS = ","}{print $1,$2,$3,$4}' |head
+
+```{bash}
+
+awk -v sex="" '{OFS =","}{if ($5 == 1) sex = "M";else sex="F"}{print $1,$2 ,$3, $4,sex,$6}' /home/m280-data/hw1/merge-geno.fam | sed 's/T2DG//g'|sed 's/,0/,/g' > reformat_merge-geno-fam.txt
+
+head -20 reformat_merge-geno-fam.txt
 
 
 ```
+
+
+
 
 
