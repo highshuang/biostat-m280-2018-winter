@@ -26,7 +26,7 @@ Here are chromosomes:
 ```{bash}
 awk '{a[$1]}END{for(b in a){print b}}' /home/m280-data/hw1/merge-geno.bim |sort -n
 
-awk '{a[$1]++}END{for(b in a){print "in chromosone " b " there are "  a[b]" SNPs"}}' /home/m280-data/hw1/merge-geno.bim | sort -nk3
+awk '{a[$1]++}END{for(b in a){print "in chromosone " b " there are "  a[b]" SNPs"}}' /home/m280-data/hw1/merge-geno.bim | sort -nk3 
 
 
 ```
@@ -52,12 +52,19 @@ head reformat_merge-geno.txt
 
 awk -v sex="" '{OFS =","}{if ($5 == 1) sex = "M";else sex="F"}{print $1,$2 ,$3, $4,sex,$6}' /home/m280-data/hw1/merge-geno.fam | sed 's/T2DG//g'|sed 's/,0/,/g' > reformat_merge-geno-fam.txt
 
-head -20 reformat_merge-geno-fam.txt #add comment
+head -20 reformat_merge-geno-fam.txt
 
 
 ```
 
+Question 3
 
+```{bash}
+
+
+
+
+```
 
 
 
