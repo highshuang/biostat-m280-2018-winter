@@ -366,7 +366,7 @@ head -20 ~/mendel_ped.txt</code></pre>
 <li><p>Expand the <a href="http://hua-zhou.github.io/teaching/biostatm280-2018winter/slides/02-linux/runSim.R"><code>runSim.R</code></a> script to include arguments <code>seed</code> (random seed), <code>n</code> (sample size), <code>dist</code> (distribution) and <code>rep</code> (number of simulation replicates). When <code>dist=&quot;gaussian&quot;</code>, generate data from standard normal; when <code>dist=&quot;t1&quot;</code>, generate data from t-distribution with degree of freedom 1 (same as Cauchy distribution); when <code>dist=&quot;t5&quot;</code>, generate data from t-distribution with degree of freedom 5. Calling <code>runSim.R</code> will (1) set random seed according to argument <code>seed</code>, (2) generate data according to argument <code>dist</code>, (3) compute the primed-indexed average estimator in class and the classical sample average estimator for each simulation replicate, (4) report the average mean squared error (MSE) <span class="math display">\[
   \frac{\sum_{r=1}^{\text{rep}} (\widehat \mu_r - \mu_{\text{true}})^2}{\text{rep}}
 \]</span> for both methods.</p>
-<p><strong>Modified runSim.R file is included in the hw1 directory.</strong></p></li>
+<p><strong>Modified runSim.R is included in the hw1 directory.</strong></p></li>
 <li><p>Modify the <a href="http://hua-zhou.github.io/teaching/biostatm280-2018winter/slides/02-linux/autoSim.R"><code>autoSim.R</code></a> script to run simulations with combinations of sample sizes <code>nVals = seq(100, 500, by=100)</code> and distributions <code>distTypes = c(&quot;gaussian&quot;, &quot;t1&quot;, &quot;t5&quot;)</code> and write output to appropriately named files. Use <code>rep = 50</code>, and <code>seed = 280</code>.</p>
 <pre class="bash"><code>Rscript autoSim.R
 </code></pre>
@@ -385,7 +385,7 @@ head -20 ~/mendel_ped.txt</code></pre>
 ## [1] &quot;sysCall=nohup Rscript runSim.R seed=280 n=500 'dist=\&quot;t1\&quot;' rep=50 &gt; n500distt1.txt&quot;
 ## [1] &quot;sysCall=nohup Rscript runSim.R seed=280 n=500 'dist=\&quot;t5\&quot;' rep=50 &gt; n500distt5.txt&quot;
 ## [1] &quot;sysCall=nohup Rscript runSim.R seed=280 n=500 'dist=\&quot;gaussian\&quot;' rep=50 &gt; n500distgaussian.txt&quot;</code></pre>
-<p><strong>Modified autoSim.R file is included in the hw1 directory.</strong></p></li>
+<p><strong>Modified autoSim.R is included in the hw1 directory.</strong></p></li>
 <li><p>Write an R script to collect simulation results from output files and print average MSEs in a table of format</p>
 <pre class="bash"><code>Rscript format.R
 </code></pre>
