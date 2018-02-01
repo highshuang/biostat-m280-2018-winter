@@ -21,7 +21,7 @@ for(i in 1:n){
 names(list.filename) <- list.filename
 
 # write in the second column
-data[,2] <- c("PrimeAvg","SampAvg","PrimeAvg","SampAvg","PrimeAvg","SampAvg",
+data[, 2] <- c("PrimeAvg","SampAvg","PrimeAvg","SampAvg","PrimeAvg","SampAvg",
               "PrimeAvg","SampAvg","PrimeAvg","SampAvg")
 
 # input sample size 
@@ -29,30 +29,30 @@ for(i in 1:10){
   # using index to specify the sample size
   index <- as.integer((i+1)/2)
   if(i %% 2 == 1){
-    data[i,1] <- index*100
+    data[i, 1] <- index*100
     
   }
 }
 
 
 # select file with same sample size 
-fileindex <- seq(1,15,3)
+fileindex <- seq(1, 15, 3)
 
 # input data into table 
 for(i in fileindex) {
   for(j in 0:2){
     temp <- list.data[[i+j]]
-    data[(i+2)/3*2-1,j+3] <- temp[1]
-    data[(i+2)/3*2,j+3] <- temp[2]
+    data[(i+2)/3*2-1, j+3] <- temp[1]
+    data[(i+2)/3*2, j+3] <- temp[2]
   }
 }
 
 # change "gaussian" col position 
-output <- cbind(data[,-3],data[,3])
+output <- cbind(data[,-3], data[,3])
 
 # rename the columns
-colname <- c("n","Method","t1","t5","Gaussian")
+colname <- c("n", "Method", "t1", "t5", "Gaussian")
 colnames(output) <- colname
 
 # output data in table format
-kable(output,"markdown")
+kable(output, "markdown")
