@@ -1,5 +1,5 @@
 # set working directory
-setwd(~/biostat-m280-2018-winter/hw1)
+setwd("~/biostat-m280-2018-winter/hw1")
 
 library(knitr)
 
