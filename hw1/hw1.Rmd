@@ -96,7 +96,9 @@ Use Linux shell commands to answer following questions.
 
       - Mendel's SNP definition file is similar to the plink `bim` file but has format  
       `SNP ID`, `Chromosome`, `Base Pair Position`  
-      with each field separated by a comma. Write a Linux shell command to convert `merge-geno.bim` to Mendel SNP definition file. The first few lines of the Mendel SNP definition file should look like
+      with each field separated by a comma. Write a Linux shell command to convert `merge-geno.bim` to Mendel SNP definition file.
+      
+      - **The first few lines of the Mendel SNP definition file are shown below:**
     ```{bash}
     echo "    2.40  = FILE FORMAT VERSION NUMBER." > ~/mendel_snpdef.txt
     echo "8348674  = NUMBER OF SNPS LISTED HERE." >> ~/mendel_snpdef.txt
@@ -107,7 +109,8 @@ Use Linux shell commands to answer following questions.
     
     - Mendel's pedigree file is similar to the plink `fam` file but has format  
     `Family ID`, `Person ID`, `Father ID`, `Mother ID`, `Sex` coded as M or F, `Twin Status`  
-    with each field separated by a comma. Write a Linux shell command to convert `merge-geno.fam` to Mendel pedigree file. Since twin status is not available in plink format, we put nothing for that field. Also Mendel limits Person ID to have length less than or equal to 8 characters, so we have to strip the string `T2DG` from the IDs. First few lines of the Mendel pedigree should look like
+    with each field separated by a comma. Write a Linux shell command to convert `merge-geno.fam` to Mendel pedigree file. Since twin status is not available in plink format, we put nothing for that field. Also Mendel limits Person ID to have length less than or equal to 8 characters, so we have to strip the string `T2DG` from the IDs.
+     - **First few lines of the Mendel pedigree are shown below:**
     ```{bash}
     awk -v sex=" " '{OFS = ","}{if($5 == 1) sex="M";else sex="F"}{print $1, $2, 
     $3, $4, sex, $6}' /home/m280-data/hw1/merge-geno.fam | sed 's/,0/,/g' | 
@@ -125,6 +128,8 @@ $$
 $$
 for both methods.
 
+    **Modified runSim.R file is included in the hw1 directory.**
+
 2. Modify the [`autoSim.R`](http://hua-zhou.github.io/teaching/biostatm280-2018winter/slides/02-linux/autoSim.R) script to run simulations with combinations of sample sizes `nVals = seq(100, 500, by=100)` and distributions `distTypes = c("gaussian", "t1", "t5")` and write output to appropriately named files. Use `rep = 50`, and `seed = 280`. 
 
     ```{bash}
@@ -132,10 +137,13 @@ for both methods.
     
     ```
 
+    **Modified autoSim.R file is included in the hw1 directory.**
+
 3. Write an R script to collect simulation results from output files and print average MSEs in a table of format
-    ```{bash, echo=TRUE,results="asis"}
+
+    ```{bash,results="asis"}
     Rscript format.R
     
     ```
 
-
+    **The methods of extracting data from the autoSim.R results and outputing data into a html form table are included in the format.R.**

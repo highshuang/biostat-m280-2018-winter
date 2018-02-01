@@ -307,9 +307,10 @@ print &quot;In chromosone &quot; b &quot;, there are &quot;  a[b]&quot; SNPs.&qu
 <ol start="4" style="list-style-type: decimal">
 <li><p>Statistical geneticists often have to reformat a data set to feed into various analysis programs. For example, to use the Mendel software <a href="http://www.genetics.ucla.edu/software/mendel" class="uri">http://www.genetics.ucla.edu/software/mendel</a>, we have to reformat the data set to be read by Mendel.</p>
 <ul>
-<li>Mendel’s SNP definition file is similar to the plink <code>bim</code> file but has format<br />
+<li><p>Mendel’s SNP definition file is similar to the plink <code>bim</code> file but has format<br />
 <code>SNP ID</code>, <code>Chromosome</code>, <code>Base Pair Position</code><br />
-with each field separated by a comma. Write a Linux shell command to convert <code>merge-geno.bim</code> to Mendel SNP definition file. The first few lines of the Mendel SNP definition file should look like</li>
+with each field separated by a comma. Write a Linux shell command to convert <code>merge-geno.bim</code> to Mendel SNP definition file.</p></li>
+<li><p><strong>The first few lines of the Mendel SNP definition file are shown below:</strong></p></li>
 </ul>
 <pre class="bash"><code>echo &quot;    2.40  = FILE FORMAT VERSION NUMBER.&quot; &gt; ~/mendel_snpdef.txt
 echo &quot;8348674  = NUMBER OF SNPS LISTED HERE.&quot; &gt;&gt; ~/mendel_snpdef.txt
@@ -329,7 +330,8 @@ head ~/mendel_snpdef.txt</code></pre>
 <ul>
 <li>Mendel’s pedigree file is similar to the plink <code>fam</code> file but has format<br />
 <code>Family ID</code>, <code>Person ID</code>, <code>Father ID</code>, <code>Mother ID</code>, <code>Sex</code> coded as M or F, <code>Twin Status</code><br />
-with each field separated by a comma. Write a Linux shell command to convert <code>merge-geno.fam</code> to Mendel pedigree file. Since twin status is not available in plink format, we put nothing for that field. Also Mendel limits Person ID to have length less than or equal to 8 characters, so we have to strip the string <code>T2DG</code> from the IDs. First few lines of the Mendel pedigree should look like</li>
+with each field separated by a comma. Write a Linux shell command to convert <code>merge-geno.fam</code> to Mendel pedigree file. Since twin status is not available in plink format, we put nothing for that field. Also Mendel limits Person ID to have length less than or equal to 8 characters, so we have to strip the string <code>T2DG</code> from the IDs.</li>
+<li><strong>First few lines of the Mendel pedigree are shown below:</strong></li>
 </ul>
 <pre class="bash"><code>awk -v sex=&quot; &quot; '{OFS = &quot;,&quot;}{if($5 == 1) sex=&quot;M&quot;;else sex=&quot;F&quot;}{print $1, $2, 
 $3, $4, sex, $6}' /home/m280-data/hw1/merge-geno.fam | sed 's/,0/,/g' | 
@@ -363,7 +365,8 @@ head -20 ~/mendel_ped.txt</code></pre>
 <ol style="list-style-type: decimal">
 <li><p>Expand the <a href="http://hua-zhou.github.io/teaching/biostatm280-2018winter/slides/02-linux/runSim.R"><code>runSim.R</code></a> script to include arguments <code>seed</code> (random seed), <code>n</code> (sample size), <code>dist</code> (distribution) and <code>rep</code> (number of simulation replicates). When <code>dist=&quot;gaussian&quot;</code>, generate data from standard normal; when <code>dist=&quot;t1&quot;</code>, generate data from t-distribution with degree of freedom 1 (same as Cauchy distribution); when <code>dist=&quot;t5&quot;</code>, generate data from t-distribution with degree of freedom 5. Calling <code>runSim.R</code> will (1) set random seed according to argument <code>seed</code>, (2) generate data according to argument <code>dist</code>, (3) compute the primed-indexed average estimator in class and the classical sample average estimator for each simulation replicate, (4) report the average mean squared error (MSE) <span class="math display">\[
   \frac{\sum_{r=1}^{\text{rep}} (\widehat \mu_r - \mu_{\text{true}})^2}{\text{rep}}
-\]</span> for both methods.</p></li>
+\]</span> for both methods.</p>
+<p><strong>Modified runSim.R file is included in the hw1 directory.</strong></p></li>
 <li><p>Modify the <a href="http://hua-zhou.github.io/teaching/biostatm280-2018winter/slides/02-linux/autoSim.R"><code>autoSim.R</code></a> script to run simulations with combinations of sample sizes <code>nVals = seq(100, 500, by=100)</code> and distributions <code>distTypes = c(&quot;gaussian&quot;, &quot;t1&quot;, &quot;t5&quot;)</code> and write output to appropriately named files. Use <code>rep = 50</code>, and <code>seed = 280</code>.</p>
 <pre class="bash"><code>Rscript autoSim.R
 </code></pre>
@@ -381,7 +384,8 @@ head -20 ~/mendel_ped.txt</code></pre>
 ## [1] &quot;sysCall=nohup Rscript runSim.R seed=280 n=400 'dist=\&quot;gaussian\&quot;' rep=50 &gt; n400distgaussian.txt&quot;
 ## [1] &quot;sysCall=nohup Rscript runSim.R seed=280 n=500 'dist=\&quot;t1\&quot;' rep=50 &gt; n500distt1.txt&quot;
 ## [1] &quot;sysCall=nohup Rscript runSim.R seed=280 n=500 'dist=\&quot;t5\&quot;' rep=50 &gt; n500distt5.txt&quot;
-## [1] &quot;sysCall=nohup Rscript runSim.R seed=280 n=500 'dist=\&quot;gaussian\&quot;' rep=50 &gt; n500distgaussian.txt&quot;</code></pre></li>
+## [1] &quot;sysCall=nohup Rscript runSim.R seed=280 n=500 'dist=\&quot;gaussian\&quot;' rep=50 &gt; n500distgaussian.txt&quot;</code></pre>
+<p><strong>Modified autoSim.R file is included in the hw1 directory.</strong></p></li>
 <li><p>Write an R script to collect simulation results from output files and print average MSEs in a table of format</p>
 <pre class="bash"><code>Rscript format.R
 </code></pre>
@@ -467,7 +471,8 @@ head -20 ~/mendel_ped.txt</code></pre>
 <td align="right">0.0025920</td>
 </tr>
 </tbody>
-</table></li>
+</table>
+<p><strong>The methods of extracting data from the autoSim.R results and outputing data into a html form table are included in the format.R.</strong></p></li>
 </ol>
 </div>
 
