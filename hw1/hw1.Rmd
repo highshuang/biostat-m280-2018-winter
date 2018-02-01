@@ -128,7 +128,7 @@ $$
 $$
 for both methods.
 
-    **Modified runSim.R file is included in the hw1 directory.**
+    **Modified runSim.R is included in the hw1 directory.**
 
 2. Modify the [`autoSim.R`](http://hua-zhou.github.io/teaching/biostatm280-2018winter/slides/02-linux/autoSim.R) script to run simulations with combinations of sample sizes `nVals = seq(100, 500, by=100)` and distributions `distTypes = c("gaussian", "t1", "t5")` and write output to appropriately named files. Use `rep = 50`, and `seed = 280`. 
 
@@ -137,7 +137,7 @@ for both methods.
     
     ```
 
-    **Modified autoSim.R file is included in the hw1 directory.**
+    **Modified autoSim.R is included in the hw1 directory.**
 
 3. Write an R script to collect simulation results from output files and print average MSEs in a table of format
 
@@ -146,4 +146,4 @@ for both methods.
     
     ```
 
-    **The methods of extracting data from the autoSim.R results and outputing data into a html form table are included in the format.R.**
+    **The methods of extracting autoSim.R results and outputing data into a html form table are included in the format.R.**
