@@ -22,9 +22,9 @@ names(list.filename) <- list.filename
 
 # write in the second column
 data[,2] <- c("PrimeAvg","SampAvg","PrimeAvg","SampAvg","PrimeAvg","SampAvg",
-             "PrimeAvg","SampAvg","PrimeAvg","SampAvg")
+              "PrimeAvg","SampAvg","PrimeAvg","SampAvg")
 
-# input data into data table
+# input sample size 
 for(i in 1:10){
   # using index to specify the sample size
   index <- as.integer((i+1)/2)
@@ -38,6 +38,7 @@ for(i in 1:10){
 # select file with same sample size 
 fileindex <- seq(1,15,3)
 
+# input data into table 
 for(i in fileindex) {
   for(j in 0:2){
     temp <- list.data[[i+j]]
@@ -46,16 +47,12 @@ for(i in fileindex) {
   }
 }
 
+# change "gaussian" col position 
 output <- cbind(data[,-3],data[,3])
 
-
+# rename the columns
 colname <- c("n","Method","t1","t5","Gaussian")
 colnames(output) <- colname
 
+# output data in table format
 kable(output,"markdown")
-
-
-
-
-
-
