@@ -4,7 +4,7 @@ setwd("~/biostat-m280-2018-winter/hw1")
 library(knitr)
 
 # create an empty dataframe to store the output table 
-data <- data.frame(matrix(nrow = 10, ncol = 5))
+data <- data.frame(matrix(NA,nrow = 10, ncol = 5))
 
 # create a list for all the text files in the working directory
 list.filename <- list.files(pattern = ".txt$")
@@ -26,13 +26,14 @@ names(list.filename) <- list.filename
 data[, 2] <- c("PrimeAvg","SampAvg","PrimeAvg","SampAvg","PrimeAvg","SampAvg",
               "PrimeAvg","SampAvg","PrimeAvg","SampAvg")
 
-# input sample size 
-for(i in 1:10){
+# input sample size (column 1)
+for (i in 1:10){
   # using index to specify the sample size
   index <- as.integer((i+1)/2)
-  if(i %% 2 == 1){
+  if (i %% 2 == 1){
     data[i, 1] <- index*100
-    
+  }else {
+    data[i,1] <- " "
   }
 }
 
