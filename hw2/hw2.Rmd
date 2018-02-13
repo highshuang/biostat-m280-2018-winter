@@ -1,0 +1,13 @@
+---
+title: "hw2"
+author: "Shuang Gao"
+date: "2018/2/12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Read Chapter 7 (Exploratory Data Analysis) of R for Data Science and do exercises 7.3.4, 7.4.1, 7.5.1.1, 7.5.2.1, and 7.5.3.1.
+
