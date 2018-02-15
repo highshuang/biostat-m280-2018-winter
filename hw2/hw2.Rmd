@@ -8,6 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
+
 ```
 
 ## Read Chapter 7 (Exploratory Data Analysis) of R for Data Science and do exercises 7.3.4, 7.4.1, 7.5.1.1, 7.5.2.1, and 7.5.3.1.
@@ -15,13 +16,11 @@ knitr::opts_chunk$set(echo = TRUE)
 ### 7.3.4
 1. Explore the distribution of each of the x, y, and z variables in diamonds. What do you learn? Think about a diamond and how you might decide which dimension is the length, width, and depth.
 ```{r}
-library(tidyverse)
 ggplot(data = diamonds) +
   geom_histogram(mapping = aes(x = x), binwidth = 0.5) +
-  scale_x_continuous(breaks = seq(0, 12, by = 0.5 )) +
+  scale_x_continuous(breaks = seq(3.5, 10, by = 0.5 )) +
   scale_y_continuous(breaks = seq(0, 14000, by = 2000)) +
-  coord_cartesian(x = c(0, 12)) +
-  coord_cartesian(y = c(0, 14000)) +
+  coord_cartesian(xlim = c(3.5, 10), ylim = c(0, 14000)) +
   labs(
     title = "histgram for x variable in diamonds",
     x = "x (mm)",
@@ -30,10 +29,9 @@ ggplot(data = diamonds) +
 
 ggplot(data = diamonds) +
   geom_histogram(mapping = aes(x = y), binwidth = 0.5) +
-  scale_x_continuous(breaks = seq(0, 60, by = 5)) +
+  scale_x_continuous(breaks = seq(3, 10, by = 0.5)) +
   scale_y_continuous(breaks = seq(0, 14000, by = 2000)) +
-  coord_cartesian(x = c(0,60)) +
-  coord_cartesian(y = c(0,14000)) +
+  coord_cartesian(xlim = c(3, 10), ylim = c(0,14000)) +
   labs(
     title = "histgram for y varibale in diamonds",
     x = "y (mm)",
@@ -42,14 +40,101 @@ ggplot(data = diamonds) +
   
 ggplot(data = diamonds) +
   geom_histogram(mapping = aes(x = z), binwidth = 0.5) +
-  scale_x_continuous(breaks = seq(0, 35, by = 5)) +
+  scale_x_continuous(breaks = seq(2, 7, by = 0.5)) +
   scale_y_continuous(breaks = seq(0, 14000, by = 2000)) +
-  coord_cartesian(xlim = c(0,35), ylim = c(0,14000)) +
+  coord_cartesian(xlim = c(2,7), ylim = c(0,14000)) +
   labs(
     title = "histgram for z varibale in diamonds",
     x = "z (mm)",
     y = "count of diamonds"
   )
+
 ```
-* For variable x in diamond, most of the x values are located from 3.75 to 9.25 mm.
+* For variable x in diamond, the range for x is from 3.75 to 9.75 mm, after excluding the outliers. For variable y in diamond, the range for y is from 3.75 to 9.75 mm, after excluding the outliers. For varibale z in diamond, the range for z is from 2.25 to 6.25 mm, after excluding the outliers. The range for x and y are similar, but the range for z is narrower. 
+
+```{r}
+ggplot(diamonds) +
+  geom_point(aes(x = x, y = y), color = "darkgreen") +
+  geom_point(aes(x = x, y = z), color = "blue") +
+  coord_cartesian(xlim = c(2, 11), ylim = c(2, 11)) +
+  labs(
+    title = "the ratio between y and x, y and z",
+    x = "variable x",
+    y = "variable y or z"
+  )
+  
+
+```
+* From data on google, the ration between length and width is approximately 1 : 1. In the above graph, the green points show the ratio between y and x, and the blue points show the ratio between z and x. The approximate 1 to 1 ratio between y and x indicates x and y should be length and width.Comparing the above histgrams, the value of z is generally smaller than x and y. Considering the dimension of diamond, depth is relatively shorter than the other two. The ranges for x and y are relatively the same, it is hard to distinguish which one is width and which one is length.
+
+2.Explore the distribution of price. Do you discover anything unusual or surprising? (Hint: Carefully think about the binwidth and make sure you try a wide range of values.)
+
+
+```{r}
+ggplot(diamonds) + 
+  geom_freqpoly(aes(x = price), binwidth = 100) +
+  labs(
+    title = "the histgram for price with bindwidth = 100"
+  )
+
+```
+* With binwidth 100, it is shown that as the price increases, the amount of diamonds increases fast first, and then decreases.The data set is positvely skewed. Diamonds with price around 1300 appear most. There is also an unusual decrease around 1500. Try limit the price range and identify the unusual situation.
+
+
+```{r}
+ggplot(diamonds) + 
+  geom_freqpoly(aes(x = price), binwidth = 100) +
+  coord_cartesian(xlim = c(1000, 3000))
+  labs(
+    title = "the histgram for price with bindwidth = 100 and price limit"
+  )
+ggplot(diamonds) + 
+  geom_freqpoly(aes(x = price), binwidth = 10) +
+  coord_cartesian(xlim = c(1000, 3000))
+  labs(
+    title = "the histgram for price with bindwidth = 10 and price limit"
+  )
+```
+
+* By limiting the range of price to 1000-3000, it is clearly shown that there is a sharp decrease of diamond with price 1500. Try limiting the binwidth to 10. We see a flat line around 1500, which means there is no diamonds with price 1500 in this data set.
+
+3.How many diamonds are 0.99 carat? How many are 1 carat? What do you think is the cause of the difference?
+
+```{r}
+carat.099 <- diamonds[diamonds$carat == 0.99, ]
+carat.1 <- diamonds[diamonds$carat == 1, ]
+if (nrow(carat.099) > nrow(carat.1)) {
+  print("There are more diamonds with 0.99 carat.")
+}else {
+  print("There are more diamonds with 1 carat.")
+}
+
+cat("there are ", nrow(carat.099), "0.99 carat diamonds")
+cat("there are ", nrow(carat.1), "1 carat diamonds")
+
+# show distribution around 1 carat 
+```
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
