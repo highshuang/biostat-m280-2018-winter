@@ -13,8 +13,13 @@ if (!"tidyverse" %in% rownames(installed.packages()))
 
 if (!"nycflights13" %in% rownames(installed.packages()))  
   install.packages("nycflights13", repos="http://cran.rstudio.com/")
+
+if (!"ggstance" %in% rownames(installed.packages()))  
+  install.packages("ggstance", repos="http://cran.rstudio.com/")
+
 library(tidyverse)
 library(nycflights13)
+library(ggstance)
 
 ```
 
@@ -264,7 +269,7 @@ ggplot(diamonds) +
   
 # show scatterplot of price vs y
 ggplot(diamonds) +
-  geom_point(aes(x = y, y = price), color = "black") +
+  geom_point(aes(x = y, y = price), color = "green") +
   geom_smooth(aes(x = y, y = price), color = "red")
   labs(
     title = "scatterplot of price vs y"
@@ -272,7 +277,7 @@ ggplot(diamonds) +
   
 # show scatterplot of price vs z
 ggplot(diamonds) +
-  geom_point(aes(x = z, y = price), color = "black") +
+  geom_point(aes(x = z, y = price), color = "grey") +
   geom_smooth(aes(x = z, y = price), color = "red")
   labs(
     title = "scatterplot of price vs z"
@@ -280,7 +285,7 @@ ggplot(diamonds) +
   
 # show scatterplot of price vs depth
 ggplot(diamonds) +
-  geom_point(aes(x = depth, y = price), color = "black") +
+  geom_point(aes(x = depth, y = price), color = "brown") +
   geom_smooth(aes(x = depth, y = price), color = "red")
   labs(
     title = "scatterplot of price vs depth"
@@ -288,15 +293,48 @@ ggplot(diamonds) +
   
 # show scatterplot of price vs table
 ggplot(diamonds) +
-  geom_point(aes(x = table, y = price), color = "black") +
+  geom_point(aes(x = table, y = price), color = "lightblue") +
   geom_smooth(aes(x = table, y = price), color = "red")
   labs(
     title = "scatterplot of price vs carat"
   )
 
 ```
+* Show scatterplots between all the variables and price. There is a apparent quadratic increase pattern between price vs carat. There is also increase pattern between price vs. x, y and z. However, x, y and z gives the dimension of diamonds, which contribute to the carat of diamonds. Thus, we can consider carat as the most important for predicting the price.
 
+```{r}
+ggplot(diamonds) +
+  geom_boxplot(aes(x = cut, y = carat)) +
+  labs(
+    title = "boxplot for depicting relation between carat and cut"
+  )
+```
+* Comparing the means of carat for cut of diamonds, we can see the fair cut diamonds have the greatest carat and the ideal cut diamonds have the least carat. From the previous discussion, we know carat is highly contributed to the price. Thus, lower quality diamonds (fair cut) have larger carat, which leads to higher price.
 
+3.Install the ggstance package, and create a horizontal boxplot. How does this compare to using coord_flip()?
+
+```{r}
+# coord_flip()
+ggplot(diamonds) +
+  geom_boxplot(aes(x = cut, y = carat)) +
+  coord_flip() +
+  labs(
+    title = "boxplot for depicting relation between carat and cut with 
+    coord_flip"
+  )
+
+# geom_boxploth()
+ggplot(diamonds) + 
+  geom_boxploth(aes(x = carat, y = cut)) +
+  labs(
+    title = "boxplot for depicting relation between carat and cut with 
+    boxploth"
+  )
+
+```
+* The two functions give the similar results. But we need to flip the coordinates when using geom_boxploth().
+
+4. One problem with boxplots is that they were developed in an era of much smaller datasets and tend to display a prohibitively large number of “outlying values”. One approach to remedy this problem is the letter value plot. Install the lvplot package, and try using geom_lv() to display the distribution of price vs cut. What do you learn? How do you interpret the plots?
 
 
 
