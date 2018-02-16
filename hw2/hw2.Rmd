@@ -20,10 +20,14 @@ if (!"ggstance" %in% rownames(installed.packages()))
 if (!"lvplot" %in% rownames(installed.packages()))  
   install.packages("lvplot", repos="http://cran.rstudio.com/")
 
+if (!"ggbeeswarm" %in% rownames(installed.packages()))  
+  install.packages("ggbeeswarm", repos="http://cran.rstudio.com/")
+
 library(tidyverse)
 library(nycflights13)
 library(ggstance)
 library(lvplot)
+library(ggbeeswarm)
 
 ```
 
@@ -352,7 +356,33 @@ ggplot(diamonds) +
 * Unlike boxplots only give the range, 1st to 3rd IQR, and outliers in the plot, the lvplot gives more information about the quantiles. In this case, boxplot cannot handle large number of data because more outliers will appear. By showing the whole quantiles directly, lvplots can deal with large data set.
 
 5.Compare and contrast geom_violin() with a facetted geom_histogram(), or a coloured geom_freqpoly(). What are the pros and cons of each method?
+```{r}
+# facetted histogram 
+ggplot(diamonds) +
+  geom_histogram(aes(x = price)) +
+  facet_wrap(~cut) +
+  labs(
+    title = "facetted histogram for price vs. cut"
+  )
 
+# colored freqpoly 
+ggplot(data = diamonds) + 
+  geom_freqpoly(mapping = aes(x = price, y = ..density.., colour = cut), 
+                binwidth = 400) +
+  labs(
+    title = "color freqpoly for price vs cut"
+  )
+
+##make a plot using geom_violin() 
+ggplot(diamonds) +
+  geom_violin(aes(x = cut, y = price)) +
+  labs(
+    title = "geom_violin method for price vs. cut"
+  )
+```
+* Facetted histgram gives several subplots, which is hard to compare the separate data. Colored freqpoly compares different categories by imposing them together, but is hard to distinguish when more categoreis are included. Geom_violin plot gives the clear images of the density distribution for each category, which helps to compare each group.
+
+6.If you have a small dataset, it’s sometimes useful to use geom_jitter() to see the relationship between a continuous and categorical variable. The ggbeeswarm package provides a number of methods similar to geom_jitter(). List them and briefly describe what each one does.
 
 
 
