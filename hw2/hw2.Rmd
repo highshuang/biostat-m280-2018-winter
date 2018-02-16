@@ -366,7 +366,7 @@ ggplot(diamonds) +
   )
 
 # colored freqpoly 
-ggplot(data = diamonds) + 
+ggplot(diamonds) + 
   geom_freqpoly(mapping = aes(x = price, y = ..density.., colour = cut), 
                 binwidth = 400) +
   labs(
@@ -384,8 +384,74 @@ ggplot(diamonds) +
 
 6.If you have a small dataset, it’s sometimes useful to use geom_jitter() to see the relationship between a continuous and categorical variable. The ggbeeswarm package provides a number of methods similar to geom_jitter(). List them and briefly describe what each one does.
 
+```{r}
+# geom gitter
+ggplot(mpg) +
+  geom_jitter(mapping = aes(x = reorder(class, hwy, FUN = median), 
+                           y = hwy)) +
+  labs(
+    title = "plot with geom_jitter"
+  )
+
+# geom_violin plot
+ggplot(data = mpg) +
+  geom_violin(mapping = aes(x = reorder(class, hwy, FUN = median),
+                                 y = hwy)) +
+  labs(
+    title = "plot with geom_violin"
+  )
+
+# geom_quasirandom plot
+ggplot(mpg) +
+  geom_quasirandom(mapping = aes(x = reorder(class, hwy, FUN = median), 
+                           y = hwy)) +
+  labs(
+    title = "plot with geom_quasirandom"
+  )
+# geom_beeswarm plot 
+ggplot(data = mpg) +
+  geom_beeswarm(mapping = aes(x = reorder(class, hwy, FUN = median),
+                                 y = hwy)) +
+  labs(
+    title = "plot with geom_beeswarm"
+  )
 
 
+```
+* `geom_jitter()` helps to give a random relocation for overlapping points, which improves the visualization of the data.
+* `geom_qusirandom()` produces plots with random relocation for overlapping points just like jitter function, but it also gives a violin shape according to the density distribution. With the same hwy values, `geom_qusirandom()` arrange the points from the center line with random spacing. The random spacing further gives shape similar to the density distribution.
+* `geom_beeswarm()` also creates plots with random relocation for overlapping points and violin shape. Comparing to `geom_qusirandom(), `geom_beeswarm()` arranges points with relatively equal spacing.
+
+### 7.5.2.1
+1. How could you rescale the count dataset above to more clearly show the distribution of cut within color, or color within cut?
+```{r}
+# create new var prop = proportion of each cut within each color 
+diamonds %>% count(color, cut) %>% 
+  group_by(color) %>% 
+  mutate(prop = n / sum(n)) %>%
+  ggplot(mapping = aes(x = color, y = cut)) +
+    geom_tile(mapping = aes(fill = prop)) +
+    scale_color_grey() 
+
+##make a color plot to show the distribution of cut within color
+diamonds %>% 
+  count(color, cut) %>%
+  group_by(color) %>%
+  mutate(rate = n / sum(n)) %>%
+  ggplot(mapping = aes(x = color, y = cut)) +
+    geom_tile(mapping = aes(fill = rate)) +
+    scale_color_grey()
+
+##make a color plot to show the distribution of color within cut
+diamonds %>% 
+  count(color, cut) %>%
+  group_by(cut) %>%
+  mutate(rate = n / sum(n)) %>%
+  ggplot(mapping = aes(x = color, y = cut)) +
+    geom_tile(mapping = aes(fill = rate)) +
+    scale_color_grey()
+
+```
 
 
 
