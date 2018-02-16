@@ -17,9 +17,13 @@ if (!"nycflights13" %in% rownames(installed.packages()))
 if (!"ggstance" %in% rownames(installed.packages()))  
   install.packages("ggstance", repos="http://cran.rstudio.com/")
 
+if (!"lvplot" %in% rownames(installed.packages()))  
+  install.packages("lvplot", repos="http://cran.rstudio.com/")
+
 library(tidyverse)
 library(nycflights13)
 library(ggstance)
+library(lvplot)
 
 ```
 
@@ -335,6 +339,10 @@ ggplot(diamonds) +
 * The two functions give the similar results. But we need to flip the coordinates when using geom_boxploth().
 
 4. One problem with boxplots is that they were developed in an era of much smaller datasets and tend to display a prohibitively large number of “outlying values”. One approach to remedy this problem is the letter value plot. Install the lvplot package, and try using geom_lv() to display the distribution of price vs cut. What do you learn? How do you interpret the plots?
+
+```{r}
+
+```
 
 
 
