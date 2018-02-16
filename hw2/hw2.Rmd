@@ -180,40 +180,60 @@ ggplot(diamonds) +
 # original distribution of y 
 ggplot(diamonds) + 
   geom_histogram(aes(x = y), binwidth = 0.1) +
-  coord_cartesian(xlim = c(0, 11)) +
   labs(
     title = "histgram of y with unusual values"
   )
+
+# distribution y with missing values
 diamonds2 <- diamonds %>% 
   mutate(y = ifelse(y < 3 | y > 20, NA, y))
 
-diamonds.cut <- diamonds %>%
-  mutate(cut = ifelse(cut == "Fair", "Fair",
-        ifelse(cut == "Good", "Good",
-        ifelse(cut == "Premium","Premium",
-        ifelse(cut == "Ideal", "Ideal", NA)))))
-
 ggplot(diamonds2, aes(x = y)) +
-  geom_histogram( mapping = aes(x = y),  binwidth = 0.1) +
-  coord_cartesian(xlim = c(0, 11)) +
+  geom_histogram(mapping = aes(x = y), binwidth = 0.1) +
   labs(
     title = "histgram of y with unusual values"
   )
 
-ggplot(diamonds3, aes(x = cut)) +
-  geom_bar( mapping = aes(x = cut))
+# set ideal diamonds as missing value in the dataset
+diamonds.cut <- diamonds %>%
+  mutate(cut = ifelse(cut == "Fair", "Fair",
+        ifelse(cut == "Good", "Good",
+        ifelse(cut == "Premium", "Premium",
+        ifelse(cut == "Ideal", "Ideal", NA)))))
+
+# show bar chart for cut with missing values
+ggplot(diamonds.cut, aes(x = cut)) +
+  geom_bar(mapping = aes(x = cut)) +
+  labs(
+    title = "bar chart for cut with missing values"
+  )
 
 ```
-* Comparing 
+* Comparing the first two histgrams, first one is the original data for y and the second one is the data for y without extreme values. The first graph gives a large range of y values, because of the extreme points. The second one squeezes in, because the extreme values are removed from the data set, by setting them to missing values. Therefore, missing values will be automatically removed from the data set.
+* In order to see missing values in a bar chart, let's set the ideal cut diamonds to NA, and then plot the bar chart for cut. in the bar chart, one extra column for NA is shown in the graph. 
+
+2.What does na.rm = TRUE do in mean() and sum()?
+```{r}
+data <- c(1, 2, 3, 4, 5, 6, NA)
+
+mean(data)
+mean(data, na.rm = TRUE)
+
+sum(data)
+sum(data, na.rm = TRUE)
+```
+* For both mean() and sum(), when including missing values in the data set, the results will be NA, because they take missing value into account. However, when they add na.rm = TRUE into the statement, missing values will be ignored when calculating the mean and sum.
 
 ###7.5.1.1
 1.Use what you’ve learned to improve the visualisation of the departure times of cancelled vs. non-cancelled flights.
 ```{r}
-library(nycflights13)
 flights %>% mutate(cancell = ifelse(is.na(dep_time) |is.na(arr_time), "cancell",
-                                    "not cancel")) %>% 
+                                    "not cancel"),
+                   sched_hour = sched_dep_time %/% 100,
+                   sched_min = sched_dep_time %% 100,
+                   sched_dep_time = sched_hour + sched_min / 60) %>% 
   ggplot() +
-  geom_boxplot(aes(x = cancell, y = dep_time)) +
+  geom_boxplot(aes(x = cancell, y = sched_dep_time)) +
   labs(
     title = "boxplot for departure times of cancelled vs. non-cancelled 
     flights",
@@ -221,9 +241,58 @@ flights %>% mutate(cancell = ifelse(is.na(dep_time) |is.na(arr_time), "cancell",
     y = "departure time"
   )
 ```
+* Using box-plots help visualisation of departure time, by clearly showing the range, mean and outliers.
 
 2.What variable in the diamonds dataset is most important for predicting the price of a diamond? How is that variable correlated with cut? Why does the combination of those two relationships lead to lower quality diamonds being more expensive?
 ```{r}
+
+# show scatterplot of price vs carat
+ggplot(diamonds) +
+  geom_point(aes(x = carat, y = price), color = "black") +
+  geom_smooth(aes(x = carat, y = price), color = "red")
+  labs(
+    title = "scatterplot of price vs carat"
+  )
+  
+# show scatterplot of price vs x
+ggplot(diamonds) +
+  geom_point(aes(x = x, y = price), color = "blue") +
+  geom_smooth(aes(x = x, y = price), color = "red")
+  labs(
+    title = "scatterplot of price vs x"
+  )
+  
+# show scatterplot of price vs y
+ggplot(diamonds) +
+  geom_point(aes(x = y, y = price), color = "black") +
+  geom_smooth(aes(x = y, y = price), color = "red")
+  labs(
+    title = "scatterplot of price vs y"
+  )
+  
+# show scatterplot of price vs z
+ggplot(diamonds) +
+  geom_point(aes(x = z, y = price), color = "black") +
+  geom_smooth(aes(x = z, y = price), color = "red")
+  labs(
+    title = "scatterplot of price vs z"
+  )
+  
+# show scatterplot of price vs depth
+ggplot(diamonds) +
+  geom_point(aes(x = depth, y = price), color = "black") +
+  geom_smooth(aes(x = depth, y = price), color = "red")
+  labs(
+    title = "scatterplot of price vs depth"
+  )
+  
+# show scatterplot of price vs table
+ggplot(diamonds) +
+  geom_point(aes(x = table, y = price), color = "black") +
+  geom_smooth(aes(x = table, y = price), color = "red")
+  labs(
+    title = "scatterplot of price vs carat"
+  )
 
 ```
 
