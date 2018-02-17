@@ -598,14 +598,48 @@ ggplot(data = diamonds) +
 * From the bin plots for x and y, we will regrad the extreme values for x and y as outliers. However, in this example, x and y has a strong linear relation. Large values of x or y do not mean it is a outlier if the corresponding y value is also large. The outliers in scatterplot have normal x or y values, which will not be revealed by bin plots.
 
 ##Question 2: Redo HW1 Q2 using tidyverse.
+* First read in data files.
 ```{r}
-geno_data <- read.csv(file = "/home/m280-data/hw1/merge-geno.bim", header = TRUE)
+gen <- read_tsv(file = "/home/m280-data/hw1/merge-geno.bim", 
+                col_names = c("Chromosome", "SNP_ID", 
+                              "Genetic_Distance", 
+                              "bp", 
+                              "Allele_1", 
+                              "Allele_2"))
+
+fam <- read_delim(file = "/home/m280-data/hw1/merge-geno.fam",
+                  delim = " ", col_names = c("Fam_ID", "Person_ID", 
+                                             "Father_ID", "Mother_ID", "Sex",
+                                             "Affection_Status"))
 ```
 
 1.How many persons are in the data set (statisticians call this n)? How many SNPs are in the data set (statisticians call this p)?
+```{r}
+gen %>% count()
 
+ind %>% count()
 
+```
+* There are 8348673	SNP and 958 persoons in data set.
 
+2.Which chromosomes does this data set contain? How many SNPs are in each chromosome?
+```{r}
+gen %>%
+  group_by(Chromosome) %>%
+  summarise(n = n())
+```
+
+3.MAP4 (microtubule-associated protein 4) is a gene on chromosome 3 spanning positions 47,892,180 bp – 48,130,769 bp. How many SNPs are located within MAP4 gene?
+
+```{r}
+gen %>% filter(Chromosome == 3, bp >= 47892180, bp <= 48130769) %>%
+  summarise(n = n())
+```
+* There are 894 SNPs located within MAP4 gene.
+4. Reformat 1:
+```{r}
+
+```
 
 
 
