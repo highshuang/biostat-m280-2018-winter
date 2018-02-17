@@ -23,11 +23,15 @@ if (!"lvplot" %in% rownames(installed.packages()))
 if (!"ggbeeswarm" %in% rownames(installed.packages()))  
   install.packages("ggbeeswarm", repos="http://cran.rstudio.com/")
 
+if (!"dplyr" %in% rownames(installed.packages()))  
+  install.packages("dplyr", repos="http://cran.rstudio.com/")
+
 library(tidyverse)
 library(nycflights13)
 library(ggstance)
 library(lvplot)
 library(ggbeeswarm)
+library(dplyr)
 
 ```
 
@@ -308,7 +312,7 @@ ggplot(diamonds) +
   )
 
 ```
-* Show scatterplots between all the variables and price. There is a apparent quadratic increase pattern between price vs carat. There is also increase pattern between price vs. x, y and z. However, x, y and z gives the dimension of diamonds, which contribute to the carat of diamonds. Thus, we can consider carat as the most important for predicting the price.
+* Show scatterplots between all the variables and price. There is a apparent exponential increase pattern between price vs carat. There is also increase pattern between price vs. x, y and z. However, x, y and z gives the dimension of diamonds, which contribute to the carat of diamonds. Thus, we can consider carat as the most important for predicting the price.
 
 ```{r}
 ggplot(diamonds) +
@@ -354,6 +358,7 @@ ggplot(diamonds) +
 
 ```
 * Unlike boxplots only give the range, 1st to 3rd IQR, and outliers in the plot, the lvplot gives more information about the quantiles. In this case, boxplot cannot handle large number of data because more outliers will appear. By showing the whole quantiles directly, lvplots can deal with large data set.
+* In this plot, for each category of cut, the range is slamost the same and the price is positively skewed. Comparing the plot of fair cut with others, fair cut plot has thinner tails, which indicates there are less diamonds greater than 15000$ or less than 2000$.
 
 5.Compare and contrast geom_violin() with a facetted geom_histogram(), or a coloured geom_freqpoly(). What are the pros and cons of each method?
 ```{r}
@@ -426,6 +431,7 @@ ggplot(data = mpg) +
 1. How could you rescale the count dataset above to more clearly show the distribution of cut within color, or color within cut?
 ```{r}
 # create new var prop = proportion of each cut within each color 
+# and produce the plot cut vs color
 diamonds %>% count(color, cut) %>% 
   group_by(color) %>% 
   mutate(prop = n / sum(n)) %>%
@@ -433,29 +439,76 @@ diamonds %>% count(color, cut) %>%
     geom_tile(mapping = aes(fill = prop)) +
     scale_color_grey() 
 
-##make a color plot to show the distribution of cut within color
-diamonds %>% 
-  count(color, cut) %>%
-  group_by(color) %>%
-  mutate(rate = n / sum(n)) %>%
+# create new var prop = proportion of each color within each cut 
+# and produce the plot cut vs color
+diamonds %>% count(color, cut) %>% 
+  group_by(cut) %>% 
+  mutate(prop = n / sum(n)) %>%
   ggplot(mapping = aes(x = color, y = cut)) +
-    geom_tile(mapping = aes(fill = rate)) +
-    scale_color_grey()
-
-##make a color plot to show the distribution of color within cut
-diamonds %>% 
-  count(color, cut) %>%
-  group_by(cut) %>%
-  mutate(rate = n / sum(n)) %>%
-  ggplot(mapping = aes(x = color, y = cut)) +
-    geom_tile(mapping = aes(fill = rate)) +
-    scale_color_grey()
+    geom_tile(mapping = aes(fill = prop)) +
+    scale_color_grey() 
 
 ```
+* The first plot shows the distribution of cut within color, which is completed by calculating proportion of cut within color and then ploting. The second plot shows the distribution of color within cut, which is completed by calculating proportion of cut within color and then ploting.
+
+2.Use geom_tile() together with dplyr to explore how average flight delays vary by destination and month of year. What makes the plot difficult to read? How could you improve it?
+
+```{r}
+flights %>%
+  group_by(month, dest) %>%
+  summarise(avg.dep.delay = mean(dep_delay, na.rm = TRUE)) %>%
+  ggplot() +
+    geom_tile(aes(x = month, y = dest, fill = avg.dep.delay)) +
+    labs(x = "Month", 
+         y = "Destination", 
+         fill = "Departure Delay")
+```
+* There are too many destinations in the data, which makes the y labels squeeze together and is hard to read. It also increases the number of tiles in the graph, which makes it hard to interpret each tile. It is also hard to distinguish from light blue to dark blue. Using more distinguishable color may be a better choice. Also, there are blank tiles in the graph, which indicate the missing values for average flight. This is caused by no flight departed from the airport at certain month. The x label for month should be integers.
+
+```{r}
+flights %>% 
+  group_by(month, dest) %>%
+  summarise(avg.dep.delay = mean(dep_delay, na.rm = TRUE)) %>%
+  group_by(dest) %>%
+  filter(n() == 12) %>%
+  ungroup() %>%
+  mutate(dest = reorder(dest, avg.dep.delay)) %>%
+  ggplot() +
+  geom_tile(mapping = aes(x = factor(month),
+                          y = reorder(dest, month),
+                          fill = avg.dep.delay)) +
+  scale_fill_gradient2(low = 'blue', mid = 'green', high = 'yellow',
+                       midpoint = 45)
 
 
+```
+* In order to analyze the airport data, it is unreasonable to only selet part of the airports as destination. If there are more restrictions on destination, we can have clearer y-aixs. In the above graph, the x-labels are changed to interger values, color for the tiles are changed to more distinguishable one, and data row with blank tile are removed.
 
+3.Why is it slightly better to use aes(x = color, y = cut) rather than aes(x = cut, y = color) in the example above?
 
+```{r}
+diamonds %>% 
+  count(color, cut) %>%  
+  ggplot(mapping = aes(x = cut, y = color)) +
+  geom_tile(mapping = aes(fill = n))
+
+diamonds %>% 
+  count(color, cut) %>%  
+  ggplot(mapping = aes(x = color, y = cut)) +
+  geom_tile(mapping = aes(fill = n))
+
+```
+* `aes(x = color, y = cut)` puts long labels for cut on y-axis, which makes the long labels more readable. Thus `aes(x = color, y = cut)` is slightly better than `aes(x = cut, y = color)` in the example above.
+
+### 7.5.3.1
+1.Instead of summarising the conditional distribution with a boxplot, you could use a frequency polygon. What do you need to consider when using cut_width() vs cut_number()? How does that impact a visualisation of the 2d distribution of carat and price?
+
+```{r}
+# cut_width
+ggplot(data = diamonds, mapping = aes(x = carat, y = price)) + 
+  geom_freqpoly(mapping = aes(group = cut_number(carat, 20)))
+
+```
 
 
 
