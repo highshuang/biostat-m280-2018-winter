@@ -638,9 +638,52 @@ gen %>% filter(Chromosome == 3, bp >= 47892180, bp <= 48130769) %>%
 * There are 894 SNPs located within MAP4 gene.
 4. Reformat 1:
 ```{r}
+# create a new empty txt file in current directory
+# and make a connection to it
+connection <- file("mendel1.txt", open = "a")
+
+# append the first two lines to the file
+writeLines("    2.40 = FILE FORMAT VERSION NUMBER", connection)
+writeLines("8348674 = NUMBER OF SNPS LISTED HERE", connection)
+
+# close connection to the txt file
+close(connection)
+
+# format the output data 
+bim_reformat <- select(gen, SNP_ID, Chromosome, bp)
+
+# append the output data
+write_delim(bim_reformat, "mendel1.txt", delim = ",", append = TRUE)
+  
 
 ```
+```{bash}
+head mendel1.txt
+rm mendel1.txt
+```
+Reformat 2:
+```{r}
 
+# format the output data 
+fam_reformat <- fam %>%
+  mutate(Sex = replace(Sex, Sex == 1, "M")) %>%
+  mutate(Sex = replace(Sex, Sex == 2, "F")) %>%
+  mutate(Affection_Status = replace(Affection_Status, Affection_Status == 0,
+                                    "")) %>%
+  mutate(Father_ID = replace(Father_ID, Father_ID == "0", ""))%>%
+  mutate(Mother_ID = replace(Mother_ID, Mother_ID == "0", "")) %>%
+  mutate(Person_ID = str_replace(Person_ID, "T2DG", "")) %>%
+  mutate(Father_ID = str_replace(Father_ID, "T2DG", "")) %>%
+  mutate(Mother_ID = str_replace(Mother_ID, "T2DG", ""))
+
+# append the output data
+write_delim(fam_reformat, "mendel2.txt", delim = ",", append = TRUE)
+
+```
+```{bash}
+head -20 mendel2.txt 
+rm mendel2.txt
+```
 
 
 
