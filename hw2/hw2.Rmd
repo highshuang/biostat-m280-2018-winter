@@ -35,7 +35,7 @@ library(dplyr)
 
 ```
 
-## Read Chapter 7 (Exploratory Data Analysis) of R for Data Science and do exercises 7.3.4, 7.4.1, 7.5.1.1, 7.5.2.1, and 7.5.3.1.
+## Quesiton 1: Read Chapter 7 (Exploratory Data Analysis) of R for Data Science and do exercises 7.3.4, 7.4.1, 7.5.1.1, 7.5.2.1, and 7.5.3.1.
 
 ### 7.3.4
 1. Explore the distribution of each of the x, y, and z variables in diamonds. What do you learn? Think about a diamond and how you might decide which dimension is the length, width, and depth.
@@ -423,9 +423,9 @@ ggplot(data = mpg) +
 
 
 ```
-* `geom_jitter()` helps to give a random relocation for overlapping points, which improves the visualization of the data.
-* `geom_qusirandom()` produces plots with random relocation for overlapping points just like jitter function, but it also gives a violin shape according to the density distribution. With the same hwy values, `geom_qusirandom()` arrange the points from the center line with random spacing. The random spacing further gives shape similar to the density distribution.
-* `geom_beeswarm()` also creates plots with random relocation for overlapping points and violin shape. Comparing to `geom_qusirandom(), `geom_beeswarm()` arranges points with relatively equal spacing.
+* `geom_jitter()` helps to give a random relocation for overlapping points, which improves the visualization of the data. There is random gapping between poitns.
+* `geom_qusirandom()` produces plots with random relocation for overlapping points just like jitter function, but it also gives a violin shape according to the density distribution. With the same hwy values, `geom_qusirandom()` arrange the points from the center line with random gapping. The random spacing further gives shape similar to the density distribution.
+* `geom_beeswarm()` also creates plots with random relocation for overlapping points and violin shape. Comparing to `geom_qusirandom(), `geom_beeswarm()` arranges points with no gapping.
 
 ### 7.5.2.1
 1. How could you rescale the count dataset above to more clearly show the distribution of cut within color, or color within cut?
@@ -505,13 +505,104 @@ diamonds %>%
 
 ```{r}
 # cut_width
-ggplot(data = diamonds, mapping = aes(x = carat, y = price)) + 
-  geom_freqpoly(mapping = aes(group = cut_number(carat, 20)))
+ggplot(diamonds) + 
+  geom_freqpoly(mapping = aes(x = price,
+                              color = cut_width(carat, 0.4)))
+
+# cut_width with density
+ggplot(diamonds) + 
+  geom_freqpoly(mapping = aes(x = price,
+                              y = ..density..,
+                              color = cut_width(carat, 0.4)))
+
+# cut_number
+ggplot(diamonds) +
+  geom_freqpoly(mapping = aes(x = price,
+                              color = cut_number(carat, 10)))
+ 
+# cut_number with density 
+ggplot(diamonds) +
+  geom_freqpoly(mapping = aes(x = price,
+                              y = ..density..,
+                              color = cut_number(carat, 10)))
+
+```
+* Using `cut_width` cuts the variable range equally, but in each bin, the number of data points may not be equal. The distribution of carat is positivly skewed, which means there are very few diamonds with large carat. This results that in the bins with large carat values, there are few diamonds. The density plot with `cut_width`shows the distribution within each bin, which is very different from the count plot with `cut_width`.
+* Using `cut_count` divides the bins with equal data points, thus the widths of bins may be different.In this case, since there are equal numbers in each bin, the density plot share the same shape of count plot.
+
+2.Visualize the distribution of carat, partitioned by price.
+```{r}
+
+ggplot(diamonds) +
+  geom_boxplot(aes(x = cut_number(price, 10), 
+                   y = carat)) +
+  xlab("Price") +
+  coord_flip()
+
 
 ```
 
+3. How does the price distribution of very large diamonds compare to small diamonds. Is it as you expect, or does it surprise you?
+```{r}
+ggplot(diamonds) +
+  geom_boxplot(aes(x = cut_number(carat, 5), 
+                   y = price)) +
+  xlab("carat") +
+  coord_flip() 
+```
+
+* Plot the price distribution by partioning on carat. From the medians in the boxplot, we can see the median price of very large diamonds are higher than that of small diamonds. Comparing the range of pricec for each level of carat, the large diamonds is more variable in price and the small diamonds has a narrower price range. This is not surprising, because diamonds with more carat are generally more expensive due to the weight. But they have different level of cut. An ideally cut large diamond may be very expensive and a fair cut large diamond may have lower price because of the cut quality. However, for the small diamonds, the cut quality may not affect price much comparing to the effect of weight.
+
+4.Combine two of the techniques you’ve learned to visualize the combined distribution of cut, carat, and price.
+
+```{r}
+ggplot(diamonds, aes(x = cut_number(carat, 5), y = price, color = cut)) +
+  geom_boxplot() +
+  xlab("carat") +
+  coord_flip()
+```
+5. Two dimensional plots reveal outliers that are not visible in one dimensional plots. For example, some points in the plot below have an unusual combination of x and y values, which makes the points outliers even though their x and y values appear normal when examined separately.
+Why is a scatterplot a better display than a binned plot for this case?
 
 
+```{r}
+# scatter plot
+ggplot(data = diamonds) +
+  geom_point(mapping = aes(x = x, y = y)) +
+  coord_cartesian(xlim = c(4, 11), ylim = c(4, 11)) +
+  labs(
+    title = "scatterplot for relation between x and y"
+  )
+
+# bin plot for x 
+ggplot(data = diamonds) +
+  geom_histogram(mapping = aes(x = x), binwidth = 0.5) +
+  labs(
+    title = "histgram for x variable in diamonds",
+    x = "x (mm)",
+    y = "count of diamonds"
+  )
+
+# bin plot for y
+ggplot(data = diamonds) +
+  geom_histogram(mapping = aes(x = y), binwidth = 0.5) +
+  labs(
+    title = "histgram for y varibale in diamonds",
+    x = "y (mm)",
+    y = "count of diamonds"
+  )
+
+
+
+```
+* From the bin plots for x and y, we will regrad the extreme values for x and y as outliers. However, in this example, x and y has a strong linear relation. Large values of x or y do not mean it is a outlier if the corresponding y value is also large. The outliers in scatterplot have normal x or y values, which will not be revealed by bin plots.
+
+##Question 2: Redo HW1 Q2 using tidyverse.
+```{r}
+geno_data <- read.csv(file = "/home/m280-data/hw1/merge-geno.bim", header = TRUE)
+```
+
+1.How many persons are in the data set (statisticians call this n)? How many SNPs are in the data set (statisticians call this p)?
 
 
 
