@@ -146,4 +146,4 @@ for both methods.
     
     ```
 
-    **The methods of extracting data from the autoSim.R results and outputing data into a html form table are included in the format.R.**
+    **The methods of extracting autoSim.R results and outputing data into a html form table are included in the format.R.**
