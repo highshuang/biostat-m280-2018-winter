@@ -2,6 +2,7 @@
 
 library(shiny)
 library(tidyverse)
+library(magrittr)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -28,7 +29,7 @@ ui <- fluidPage(
 
 # import data 
 payroll <- read_csv("/home/m280-data/la_payroll/LA_City_Employee_Payroll.csv")
-print(payroll, n=10, width = Inf)
+print(payroll, n=1, width = Inf)
 
 # fix column names (replace space by underscore)
 names(payroll) <- str_replace_all(names(payroll), " ", "_")
