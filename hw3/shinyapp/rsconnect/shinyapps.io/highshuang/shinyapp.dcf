@@ -1,0 +1,10 @@
+name: shinyapp
+title:
+username:
+account: highshuang
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 289412
+bundleId: 1243163
+url: https://highshuang.shinyapps.io/shinyapp/
+when: 1519759209.15335
