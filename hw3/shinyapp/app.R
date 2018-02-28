@@ -32,15 +32,6 @@ payroll_small <- payroll %>%
   )
 
 
-#####################################
-# view data
-print(payroll_small, n = 20, width = Inf)
-
-# check NA value 
-payroll_small[is.na(payroll_small$healthCost),]
-
-#####################################
-
 # convert payroll_small to rds file and read in as payroll data set
 saveRDS(payroll_small, "payroll.rds")
 payroll <- readRDS("payroll.rds")
@@ -79,19 +70,37 @@ ui <- fluidPage(
         ),
         
         # Question3 Input: number of rows to view 
-        numericInput(inputId = "obs",
-                     label = "Number of observations to view:",
-                     value = )
-      
+        numericInput(inputId = "obs_Q3",
+                     label = "Number of observations to view info for 
+                     individual:",
+                     value = 10),
+        
+        numericInput(inputId = "obs_Q4",
+                     label = "Number of observations to view info for 
+                     departmentl:",
+                     value = 5)
       ),
       
       # Show a plot of the generated distribution
       mainPanel(
-         # Question2 Output: barplot  
-         plotOutput("barPlot_Q2"),
          
-         # Question3 Output: table (person who eared most)
-         tableOutput("view_Q3")
+         # Output: Tabset w/ plot, summary, and table ----
+         tabsetPanel(type = "tabs",
+                     # Question2 Output: barplot
+                     tabPanel("Total Payroll Plot", plotOutput("barPlot_Q2")),
+                     
+                     # Question3 Output: table (person earn most)
+                     tabPanel("Individual Earn Most", 
+                              tableOutput("view_Q3")),
+                     
+                     # Question4 Output: table (depart earn most)
+                     tabPanel("Department Earn Most", 
+                              tableOutput("view_Q4")),
+                     
+                     # Question5 Output: table (depart cost most)
+                     tabPanel("Department Cost Most", 
+                              tableOutput("view_Q5"))
+         )
          
          
       )
@@ -115,12 +124,19 @@ server <- function(input, output) {
    })
    
    output$view_Q3 <- renderTable({
-     # create data set for question 3
-     earnMost <- payroll %>%
-       filter(year = input$year_Q3) %>% 
+     # create table for question 3
+     data_Q3 <- payroll %>%
+       filter(year == input$year_Q3) %>% 
        select(totalPay, basePay, overtimePay, otherPay, department, job) %>%
-       print(n = input$)
-       
+       arrange(desc(totalPay))
+     head(data_Q3, n = input$obs_Q3)
+   })
+   
+   output$view_Q4 <- renderTable({
+     # create table for question 4
+     data_Q4 <- payroll %>%
+       filter(year == input$year_Q4) %>%
+       group_by(department)
      
    })
 }
