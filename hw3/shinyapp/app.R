@@ -96,7 +96,7 @@ ui <- fluidPage(
 server <- function(input, output) {
    
    # Question2_output: stacked bar plot
-   output$histPlot_Q2 <- renderPlot({
+   output$barPlot_Q2 <- renderPlot({
      ggplot(pay, aes(x = year, y = value, fill = type)) +
        geom_col() +
        labs(
