@@ -100,8 +100,7 @@ server <- function(input, output) {
      ggplot(pay, aes(x = year, y = value, fill = type)) +
        geom_col() +
        labs(
-         title = "Yearly LA City Employee Total Payroll composed by BasePay,
-         OvertimePay and OtherPay")
+         title = "LA City Employee Total Payrol")
    })
 }
 
