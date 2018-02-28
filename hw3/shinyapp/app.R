@@ -63,6 +63,8 @@ pay <- payroll %>% select(year, basePay, overtimePay, otherPay) %>%
 
 
 
+
+
 # Define UI for application that draws a histogram
 ui <- fluidPage(
    
@@ -72,11 +74,15 @@ ui <- fluidPage(
    # Sidebar with a slider input for number of bins 
    sidebarLayout(
       sidebarPanel(
-#         sliderInput("bins",
-#                     "Number of bins:",
-#                     min = 1,
-#                     max = 50,
-#                     value = 30)
+        
+        # Question2 Input: use slider to select the target year 
+        sliderInput("year_Q2",
+                    "Year :",
+                    min = 2013,
+                    max = 2017,
+                    value = 2017
+        )
+        
       
       ),
       
