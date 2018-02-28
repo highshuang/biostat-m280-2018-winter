@@ -4,29 +4,6 @@ library(shiny)
 library(tidyverse)
 library(magrittr)
 
-# Define UI for application that draws a histogram
-ui <- fluidPage(
-   
-   # Application title
-   titlePanel("LA City Employee Payroll"),
-   
-   # Sidebar with a slider input for number of bins 
-   sidebarLayout(
-      sidebarPanel(
-         sliderInput("bins",
-                     "Number of bins:",
-                     min = 1,
-                     max = 50,
-                     value = 30)
-      ),
-      
-      # Show a plot of the generated distribution
-      mainPanel(
-         plotOutput("distPlot")
-      )
-   )
-)
-
 # import data 
 payroll <- read_csv("/home/m280-data/la_payroll/LA_City_Employee_Payroll.csv")
 
@@ -46,12 +23,12 @@ payroll_small <- payroll %>%
   transmute(year = Year, department = Department_Title,
             job = Job_Class_Title,
             totalPay = abs(as.numeric(substr(Total_Payments, 2, 
-                                              length(Total_Payments)))),
+                                             length(Total_Payments)))),
             basePay = abs(as.numeric(substr(Base_Pay, 2, length(Base_Pay)))),
             overtimePay = abs(as.numeric(substr(Overtime_Pay, 2, 
-                                            length(Overtime_Pay)))),  # over time pay missing
+                                                length(Overtime_Pay)))),  # over time pay missing
             otherPay = abs(as.numeric(substr(otherPay, 2, 
-                                         length(otherPay)))),
+                                             length(otherPay)))),
             totalCost = abs(as.numeric(substr(Average_Benefit_Cost, 2, 
                                               length(Average_Benefit_Cost)))),
             healthCost = abs(as.numeric(substr(Average_Health_Cost, 2, 
@@ -72,10 +49,52 @@ payroll_small[is.na(payroll_small$healthCost),]
 saveRDS(payroll_small, "payroll.rds")
 payroll <- readRDS("payroll.rds")
 
+
+
+
+
+
+
+
+# Define UI for application that draws a histogram
+ui <- fluidPage(
+   
+   # Application title
+   titlePanel("LA City Employee Payroll"),
+   
+   # Sidebar with a slider input for number of bins 
+   sidebarLayout(
+      sidebarPanel(
+#         sliderInput("bins",
+#                     "Number of bins:",
+#                     min = 1,
+#                     max = 50,
+#                     value = 30)
+        # Question 2: select year 
+        selectInput(inputId = "year_Q2",
+                    lable = "Year :",
+                    choices = c("2013", "2014", "2015", "2016", "2017"))
+      
+      ),
+      
+      # Show a plot of the generated distribution
+      mainPanel(
+        # histgram output view for Question2  
+         plotOutput("histPlot_Q2")
+         
+      )
+   )
+)
+
+
+
+
 # Define server logic required to draw a histogram
 server <- function(input, output) {
    
-   output$distPlot <- renderPlot({
+   # histgram for total LA City payroll of each year, with breakdown into base pay, 
+   # overtime pay, and other pay.
+   output$histPlot_Q2 <- renderPlot({
       # generate bins based on input$bins from ui.R
       x    <- faithful[, 2] 
       bins <- seq(min(x), max(x), length.out = input$bins + 1)
