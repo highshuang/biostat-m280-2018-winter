@@ -3,6 +3,7 @@
 library(shiny)
 library(tidyverse)
 library(magrittr)
+library(ggplot2)
 
 # import data 
 payroll <- read_csv("/home/m280-data/la_payroll/LA_City_Employee_Payroll.csv")
@@ -49,8 +50,13 @@ payroll_small[is.na(payroll_small$healthCost),]
 saveRDS(payroll_small, "payroll.rds")
 payroll <- readRDS("payroll.rds")
 
-
-
+# create the year-round pay data(long form)
+pay <- payroll %>% select(year, basePay, overtimePay, otherPay) %>%
+  group_by(year) %>%
+  summarize(totalBase = sum(basePay, na.rm = TRUE),
+         totalOvertime = sum(overtimePay, na.rm = TRUE),
+         totalOther = sum(otherPay, na.rm = TRUE)) %>%
+  gather(totalBase, totalOvertime, totalOther, key = "type", value = "value")
 
 
 
