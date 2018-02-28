@@ -8,11 +8,6 @@ library(ggplot2)
 # import data 
 payroll <- read_csv("/home/m280-data/la_payroll/LA_City_Employee_Payroll.csv")
 
-#########################################
-# view the data 
-print(payroll, n = 2, width = Inf)
-##########################################
-
 # fix column names (replace space by underscore)
 names(payroll) <- str_replace_all(names(payroll), " ", "_")
 
@@ -81,15 +76,23 @@ ui <- fluidPage(
                     min = 2013,
                     max = 2017,
                     value = 2017
-        )
+        ),
         
+        # Question3 Input: number of rows to view 
+        numericInput(inputId = "obs",
+                     label = "Number of observations to view:",
+                     value = )
       
       ),
       
       # Show a plot of the generated distribution
       mainPanel(
-        # barplot output view for Question2  
-         plotOutput("barPlot_Q2")
+         # Question2 Output: barplot  
+         plotOutput("barPlot_Q2"),
+         
+         # Question3 Output: table (person who eared most)
+         tableOutput("view_Q3")
+         
          
       )
    )
@@ -101,7 +104,7 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
    
-   # Question2_output: stacked bar plot
+   # Question2 output: stacked bar plot
    output$barPlot_Q2 <- renderPlot({
      ggplot(pay, aes(x = year, y = value / 1000000, fill = type)) +
        geom_col() +
@@ -109,6 +112,16 @@ server <- function(input, output) {
          x = "Year",
          y = "Pay (milloion$)",
          title = "LA City Employee Total Payroll")
+   })
+   
+   output$view_Q3 <- renderTable({
+     # create data set for question 3
+     earnMost <- payroll %>%
+       filter(year = input$year_Q3) %>% 
+       select(totalPay, basePay, overtimePay, otherPay, department, job) %>%
+       print(n = input$)
+       
+     
    })
 }
 
