@@ -75,9 +75,9 @@ ui <- fluidPage(
    sidebarLayout(
       sidebarPanel(
         
-        # Question2 Input: use slider to select the target year 
-        sliderInput("year_Q2",
-                    "Year :",
+        # Question3 Input: use slider to select the target year 
+        sliderInput("year_Q3",
+                    "Select a year :",
                     min = 2013,
                     max = 2017,
                     value = 2017
@@ -103,10 +103,12 @@ server <- function(input, output) {
    
    # Question2_output: stacked bar plot
    output$barPlot_Q2 <- renderPlot({
-     ggplot(pay, aes(x = year, y = value, fill = type)) +
+     ggplot(pay, aes(x = year, y = value / 1000000, fill = type)) +
        geom_col() +
        labs(
-         title = "LA City Employee Total Payrol")
+         x = "Year",
+         y = "Pay (milloion$)",
+         title = "LA City Employee Total Payroll")
    })
 }
 
