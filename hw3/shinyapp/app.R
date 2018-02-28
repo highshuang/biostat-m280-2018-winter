@@ -62,6 +62,7 @@ pay <- payroll %>% select(year, basePay, overtimePay, otherPay) %>%
 
 
 
+
 # Define UI for application that draws a histogram
 ui <- fluidPage(
    
@@ -76,17 +77,13 @@ ui <- fluidPage(
 #                     min = 1,
 #                     max = 50,
 #                     value = 30)
-        # Question 2: select year 
-        selectInput(inputId = "year_Q2",
-                    lable = "Year :",
-                    choices = c("2013", "2014", "2015", "2016", "2017"))
       
       ),
       
       # Show a plot of the generated distribution
       mainPanel(
-        # histgram output view for Question2  
-         plotOutput("histPlot_Q2")
+        # barplot output view for Question2  
+         plotOutput("barPlot_Q2")
          
       )
    )
@@ -98,15 +95,13 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
    
-   # histgram for total LA City payroll of each year, with breakdown into base pay, 
-   # overtime pay, and other pay.
+   # Question2_output: stacked bar plot
    output$histPlot_Q2 <- renderPlot({
-      # generate bins based on input$bins from ui.R
-      x    <- faithful[, 2] 
-      bins <- seq(min(x), max(x), length.out = input$bins + 1)
-      
-      # draw the histogram with the specified number of bins
-      hist(x, breaks = bins, col = 'darkgray', border = 'white')
+     ggplot(pay, aes(x = year, y = value, fill = type)) +
+       geom_col() +
+       labs(
+         title = "Yearly LA City Employee Total Payroll composed by BasePay,
+         OvertimePay and OtherPay")
    })
 }
 
