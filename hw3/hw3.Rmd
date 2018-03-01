@@ -30,6 +30,38 @@ suppressMessages(library("dplyr"))
 The `/home/m280-data/la_payroll/LA_City_Employee_Payroll.csv` file on teaching server contains payroll information of LA City employees in years 2013-2017. It was downloaded from [LA City Controller's Office](https://controllerdata.lacity.org/Payroll/City-Employee-Payroll/pazn-qyym). Make a Shiny app to facilitate exploratory data analysis. 
 
 1. For efficiency of the Shiny app, you should first pre-process, pare down, tidy, and save the data, e.g., as a compressed RDS file, to be used in the app.
+```{r, results = "hide"}
+# import data 
+payroll <- read_csv("/home/m280-data/la_payroll/LA_City_Employee_Payroll.csv")
+
+# fix column names (replace space by underscore)
+names(payroll) <- str_replace_all(names(payroll), " ", "_")
+
+# change "Other_Pay_(Payroll_Explorer) to otherPay
+names(payroll)[24] <- "otherPay"
+
+# select target variables
+payroll_small <- payroll %>%
+  transmute(year = Year, department = Department_Title,
+            job = Job_Class_Title,
+            totalPay = abs(as.numeric(substr(Total_Payments, 2, 
+                                             length(Total_Payments)))),
+            basePay = abs(as.numeric(substr(Base_Pay, 2, length(Base_Pay)))),
+            overtimePay = abs(as.numeric(substr(Overtime_Pay, 2, 
+                                                length(Overtime_Pay)))),  
+            otherPay = abs(as.numeric(substr(otherPay, 2, 
+                                             length(otherPay)))),
+            totalCost = abs(as.numeric(substr(Average_Benefit_Cost, 2, 
+                                              length(Average_Benefit_Cost))))
+  )
+
+
+# convert payroll_small to rds file 
+wd <- getwd()
+path <- paste0(wd, "/shinyapp/payroll.rds")
+saveRDS(payroll_small, path)
+```
+[link to shinyapp](https://highshuang.shinyapps.io/shinyapp/)
 
 0. **Total payroll by LA City**. Visualize the total LA City payroll of each year, with breakdown into base pay, overtime pay, and other pay.
 
@@ -58,7 +90,7 @@ dbListTables(db)
 latix <- dplyr::tbl(db, "latix")
 
 # show all col
-head(latix, n = 1, width = Inf)
+head(latix, n = 1, width = Inf) ### delete later 
 
 ```
 
@@ -66,25 +98,69 @@ head(latix, n = 1, width = Inf)
 
 ```{r}
 # total ticket amount: 4044338
-latix %>% select(Ticket_number) %>% count() %>% collect()
-  
-  distinct(Ticket_number) %>%
+latix %>% filter(!is.na(Ticket_number)) %>% 
   count()
-  
-  
-  res <- dbSendQuery(db, "SELECT COUNT(DISTINCT Ticket_number) FROM latix")
-
-  dbFetch(res)
-  
-  
-  latix %>% head() %>% collect()
-
 ```
-* In total, there are 4044338 tickets in this data set. 
+* In total, there are 4044338 tickets in this data set, after removing the missing values. 
+```{r}
+# remove missing dates
+date <- latix %>% filter(!is.na(Issue_Year), !is.na(Issue_Month), 
+                         !is.na(Issue_Day), !is.na(Issue_Wday), 
+                         !is.na(Issue_Hour))
 
+date %>% distinct(Issue_Year, Issue_Month, Issue_Day) %>%
+  arrange(desc(Issue_Year), desc(Issue_Month), desc(Issue_Day)) %>% collect() %>%
+  slice(c(1, n()))
+```
+* Tickets span from 2010/04/27 to 2017/12/30.
+
+```{r}
+date %>% filter(!is.na(Issue_Year)) %>% group_by(Issue_Year) %>%
+  summarize(count = n()) %>% arrange(desc(count))
+```
+* Year 2015 has the most data.
 
 
 0. When (which hour, weekday, month day, and month) are you most likely to get a ticket and when are you least likely to get a ticket?
+```{r}
+# hour that most/least likey to get a ticket 
+date %>% group_by(Issue_Hour) %>%
+  summarize(count = n()) %>% arrange(desc(count)) %>% 
+  collect() %>%
+  slice(c(1, n()))
+
+```
+* In the noon (hour = 12), it is most likely to get a ticket. During 5 a.m.(hour = 5), it is leastly likely to get a ticket.
+
+
+```{r}
+# weekday that most/least likey to get a ticket 
+date %>% group_by(Issue_Wday) %>%
+  summarize(count = n()) %>% arrange(desc(count)) %>% 
+  collect() %>%
+  slice(c(1, n()))
+
+```
+* It is most likely to get a ticket on Wednesday and least likely to get a ticket on Sunday.
+
+```{r}
+# month day that most/least likey to get a ticket 
+date %>% group_by(Issue_Month, Issue_Day) %>%
+  summarize(count = n()) %>% arrange(desc(count)) %>% 
+  ungroup() %>% collect() %>%
+  slice(c(1, n()))
+```
+* It is most likely to get a ticket on May 12th and least likely to get a ticket on Nov 28th.
+
+```{r}
+# month that most/least likey to get a ticket 
+date %>% group_by(Issue_Month) %>%
+  summarize(count = n()) %>% arrange(desc(count)) %>% 
+  collect() %>%
+  slice(c(1, n()))
+```
+* It is most likely to get a ticket in March and least likely to get a ticket in November.
+
 
 0. Which car makes received most citations?
 
