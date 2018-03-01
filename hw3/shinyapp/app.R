@@ -1,5 +1,4 @@
 
-
 library(shiny)
 library(tidyverse)
 library(magrittr)
@@ -22,7 +21,7 @@ payroll_small <- payroll %>%
                                              length(Total_Payments)))),
             basePay = abs(as.numeric(substr(Base_Pay, 2, length(Base_Pay)))),
             overtimePay = abs(as.numeric(substr(Overtime_Pay, 2, 
-                                                length(Overtime_Pay)))),  # over time pay missing
+                                                length(Overtime_Pay)))),  
             otherPay = abs(as.numeric(substr(otherPay, 2, 
                                              length(otherPay)))),
             totalCost = abs(as.numeric(substr(Average_Benefit_Cost, 2, 
@@ -47,29 +46,6 @@ pay <- payroll %>% select(year, basePay, overtimePay, otherPay) %>%
          totalOvertime = sum(overtimePay, na.rm = TRUE),
          totalOther = sum(otherPay, na.rm = TRUE)) %>%
   gather(totalBase, totalOvertime, totalOther, key = "type", value = "value")
-
-
-######################################
-
-selectJob <- payroll %>% 
-  filter(job == "Police Commander", year == 2017) %>%
-  select(year, job, totalPay)
-
-
-# add density curve if checkbox return TRUE
-  ggplot(selectJob, aes(x = totalPay/1000)) +
-    geom_histogram(aes(y = ..density..), fill = "white", color = "black") +
-    geom_density(alpha = 0.2, fill = "#FF6666") +
-    labs(
-      title = "histgram for annual salary of interested job",
-      y = "Probability",
-      x = "Salary (thousand$)"
-    )
-
-############################################
-
-
-
 
 
 # Define UI for application that draws a histogram
@@ -114,11 +90,11 @@ ui <- fluidPage(
                   about its annual salary:",
                   value = "Police Commander"),
         
-        # Question6 Input: checkbox for add density dist for hist in Q5
-        checkboxGroupInput(inputId = "density",
-                           lable = "Show histgram with density curve:",
-                           choices = "density curve",
-                           selected = "density curve")
+        # Question6 Input: choose for adding density dist or not for hist in Q5
+        radioButtons("density", "Visualize the histgram of annual salary 
+                     with/without density curve",
+                     c("density curve" = "with",
+                       "no density curve" = "without"))
       ),
       
       # Show a plot of the generated distribution
@@ -152,7 +128,6 @@ ui <- fluidPage(
 
 
 
-
 # Define server logic required to draw a histogram
 server <- function(input, output) {
    
@@ -180,23 +155,25 @@ server <- function(input, output) {
      if(input$method == "mean") {
        data_Q4_mean <- payroll %>% filter(year == input$year_Q3) %>%
          group_by(department) %>%
-         summarize(meanTotal = mean(totalPay, na.rm = TRUE),
-                   meanBase = mean(basePay, na.rm = TRUE),
-                   meanOvertime = mean(overtimePay, na.rm = TRUE),
-                   meanOther = mean(otherPay, na.rm = TRUE)) %>%
-         arrange(desc(meanTotal)) %>%
-         select(department, meanTotal, meanBase, meanOvertime, meanOther)
+         summarize(meanTotalPay = mean(totalPay, na.rm = TRUE),
+                   meanBasePay = mean(basePay, na.rm = TRUE),
+                   meanOvertimePay = mean(overtimePay, na.rm = TRUE),
+                   meanOtherPay = mean(otherPay, na.rm = TRUE)) %>%
+         arrange(desc(meanTotalPay)) %>%
+         select(department, meanTotalPay, meanBasePay, meanOvertimePay, 
+                meanOtherPay)
     
        head(data_Q4_mean, n = input$obs_Q4)
      }else {
        data_Q4_median <- payroll %>% filter(year == input$year_Q3) %>%
          group_by(department) %>%
-         summarize(medianTotal = median(totalPay, na.rm = TRUE),
-                   medianBase = median(basePay, na.rm = TRUE),
-                   medianOvertime = median(overtimePay, na.rm = TRUE),
-                   medianOther = median(otherPay, na.rm = TRUE)) %>%
-         arrange(desc(medianTotal)) %>%
-         select(department, medianTotal, medianBase, medianOvertime, medianOther)
+         summarize(medianTotalPay = median(totalPay, na.rm = TRUE),
+                   medianBasePay = median(basePay, na.rm = TRUE),
+                   medianOvertimePay = median(overtimePay, na.rm = TRUE),
+                   medianOtherPay = median(otherPay, na.rm = TRUE)) %>%
+         arrange(desc(medianTotalPay)) %>%
+         select(department, medianTotalPay, medianBasePay, medianOvertimePay, 
+                medianOtherPay)
        
        head(data_Q4_median, n = input$obs_Q4) 
        
@@ -208,11 +185,18 @@ server <- function(input, output) {
      data_Q5 <- payroll %>%
        filter(year == input$year_Q3) %>% 
        group_by(department) %>%
-       arrange(desc(totalCost)) %>%
-       select(department, totalCost, totalPay, basePay, overtimePay, otherPay)
+       summarize(
+         sumtotalCost = sum(totalCost),
+         sumtotalPay = sum(totalPay),
+         sumBasePay = sum(basePay),
+         sumOvertimePay = sum(overtimePay),
+         sumOtherPay = sum(otherPay)
+       ) %>%
+       arrange(desc(sumtotalCost)) %>%
+       select(department, sumtotalCost, sumtotalPay, sumBasePay, sumOvertimePay,
+              sumOtherPay)
      
      head(data_Q5, n = input$obs_Q4)
-     
    })
    
    output$view_Q6 <- renderPlot({
@@ -222,7 +206,7 @@ server <- function(input, output) {
        select(year, job, totalPay)
      
      # add density curve if checkbox return TRUE
-     if(input$density) {
+     if(input$density == "with") {
        ggplot(selectJob, aes(x = totalPay/1000)) +
          geom_histogram(aes(y = ..density..), fill = "white", color = "black") +
          geom_density(alpha = 0.2, fill = "#FF6666") +
@@ -246,6 +230,4 @@ server <- function(input, output) {
 }
 
 # Run the application 
-
 shinyApp(ui = ui, server = server)
-
