@@ -163,8 +163,19 @@ date %>% group_by(Issue_Month) %>%
 
 
 0. Which car makes received most citations?
+```{r}
+latix %>% group_by(Make) %>%
+  summarize(count = n()) %>%
+  arrange(desc(count)) %>% collect() %>%
+  slice(1)
+```
+* Toyota makes received most citations (669548 citations).
 
 0. How many different colors of cars were ticketed? Which color attracted most tickets?
+```{r}
+latix %>% 
+```
+
 
 0. What are the most common ticket types?
 
