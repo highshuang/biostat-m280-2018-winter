@@ -50,20 +50,20 @@ pay <- payroll %>% select(year, basePay, overtimePay, otherPay) %>%
 
 
 ######################################
+
 selectJob <- payroll %>% 
-  filter(job == input$job_Q6) %>%
-  group_by(year) %>%
-  summarize(meanSalary = mean(totalPay, na.rm = TRUE)) %>%
-  select(meanSalary, year, job)
+  filter(job == "Police Commander", year == 2017) %>%
+  select(year, job, totalPay)
+
 
 # add density curve if checkbox return TRUE
-  ggplot(selectJob, aes(x = year, y = totalPay)) +
-    geom_histogram() +
+  ggplot(selectJob, aes(x = totalPay/1000)) +
+    geom_histogram(aes(y = ..density..), fill = "white", color = "black") +
     geom_density(alpha = 0.2, fill = "#FF6666") +
     labs(
-      title = "histgram for target job from 2013 to 2017",
-      x = "year",
-      y = "Salary"
+      title = "histgram for annual salary of interested job",
+      y = "Probability",
+      x = "Salary (thousand$)"
     )
 
 ############################################
@@ -216,38 +216,32 @@ server <- function(input, output) {
    })
    
    output$view_Q6 <- renderPlot({
-     # create data with given job title
+     # create table with target job, elected year and totalPay 
      selectJob <- payroll %>% 
-       filter(job == input$job_Q6) %>%
-       group_by(year) %>%
-       summarize(meanSalary = mean(totalPay, na.rm = TRUE)) %>%
-       select(meanSalary, year, job)
+       filter(job == input$job_Q6, year == input$year_Q3) %>%
+       select(year, job, totalPay)
      
      # add density curve if checkbox return TRUE
      if(input$density) {
-       ggplot(selectJob, aes(x = year, y = totalPay)) +
-         geom_histogram() +
+       ggplot(selectJob, aes(x = totalPay/1000)) +
+         geom_histogram(aes(y = ..density..), fill = "white", color = "black") +
          geom_density(alpha = 0.2, fill = "#FF6666") +
          labs(
-           title = "histgram for target job from 2013 to 2017",
-           x = "year",
-           y = "Salary"
+           title = "histgram for annual salary of interested job",
+           y = "Probability",
+           x = "Salary (thousand$)"
          )
        
      }else {
-       ggplot(selectJob, aes(x = year, y = totalPay)) +
-         geom_histogram() +
+       ggplot(selectJob, aes(x = totalPay/1000)) +
+         geom_histogram(aes(y = ..density..), fill = "white", color = "black") +
          labs(
-           title = "histgram for target job from 2013 to 2017",
-           x = "year",
-           y = "Salary"
+           title = "histgram for annual salary of interested job",
+           y = "Probability",
+           x = "Salary (thousand$)"
          )
      }
-       
-     
-     
-     
-     
+      
    })
 }
 
