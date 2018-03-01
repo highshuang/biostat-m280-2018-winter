@@ -49,6 +49,28 @@ pay <- payroll %>% select(year, basePay, overtimePay, otherPay) %>%
   gather(totalBase, totalOvertime, totalOther, key = "type", value = "value")
 
 
+######################################
+selectJob <- payroll %>% 
+  filter(job == input$job_Q6) %>%
+  group_by(year) %>%
+  summarize(meanSalary = mean(totalPay, na.rm = TRUE)) %>%
+  select(meanSalary, year, job)
+
+# add density curve if checkbox return TRUE
+  ggplot(selectJob, aes(x = year, y = totalPay)) +
+    geom_histogram() +
+    geom_density(alpha = 0.2, fill = "#FF6666") +
+    labs(
+      title = "histgram for target job from 2013 to 2017",
+      x = "year",
+      y = "Salary"
+    )
+
+############################################
+
+
+
+
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -84,7 +106,19 @@ ui <- fluidPage(
         radioButtons("method", "Choose either mean or median to visualize
                      the department earn most:",
                      c("median" = "median",
-                       "mean" = "mean"))
+                       "mean" = "mean")),
+        
+        # Quesiton6 Input: text for job title
+        textInput(inputId = "job_Q6",
+                  label = "Type in the job you are interested 
+                  about its annual salary:",
+                  value = "Police Commander"),
+        
+        # Question6 Input: checkbox for add density dist for hist in Q5
+        checkboxGroupInput(inputId = "density",
+                           lable = "Show histgram with density curve:",
+                           choices = "density curve",
+                           selected = "density curve")
       ),
       
       # Show a plot of the generated distribution
@@ -106,14 +140,12 @@ ui <- fluidPage(
                      # Question5 Output: table (depart cost most)
                      tabPanel("Department Cost Most", 
                               tableOutput("view_Q5")),
-                     # Question6 Input: select job title 
-                     selectInput(inputId = "job",
-                                 label = "Select the job you interested:",
-                                 choices = c("", "", ""))
-                    
+                     
+                     # Question6 Output: hist for annual salary for given job
+                     tabPanel("Dist for Annual Job Salary",
+                              plotOutput("view_Q6"))
+                     
          )
-         
-         
       )
    )
 )
@@ -172,6 +204,7 @@ server <- function(input, output) {
    })
    
    output$view_Q5 <- renderTable({
+     # create table for question5
      data_Q5 <- payroll %>%
        filter(year == input$year_Q3) %>% 
        group_by(department) %>%
@@ -179,6 +212,41 @@ server <- function(input, output) {
        select(department, totalCost, totalPay, basePay, overtimePay, otherPay)
      
      head(data_Q5, n = input$obs_Q4)
+     
+   })
+   
+   output$view_Q6 <- renderPlot({
+     # create data with given job title
+     selectJob <- payroll %>% 
+       filter(job == input$job_Q6) %>%
+       group_by(year) %>%
+       summarize(meanSalary = mean(totalPay, na.rm = TRUE)) %>%
+       select(meanSalary, year, job)
+     
+     # add density curve if checkbox return TRUE
+     if(input$density) {
+       ggplot(selectJob, aes(x = year, y = totalPay)) +
+         geom_histogram() +
+         geom_density(alpha = 0.2, fill = "#FF6666") +
+         labs(
+           title = "histgram for target job from 2013 to 2017",
+           x = "year",
+           y = "Salary"
+         )
+       
+     }else {
+       ggplot(selectJob, aes(x = year, y = totalPay)) +
+         geom_histogram() +
+         labs(
+           title = "histgram for target job from 2013 to 2017",
+           x = "year",
+           y = "Salary"
+         )
+     }
+       
+     
+     
+     
      
    })
 }
