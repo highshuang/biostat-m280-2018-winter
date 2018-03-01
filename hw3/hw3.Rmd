@@ -6,6 +6,19 @@ output: html_document
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+    if (!"DBI" %in% rownames(installed.packages()))  
+      install.packages("DBI", repos = "http://cran.rstudio.com/")
+    if (!"RSQLite" %in% rownames(installed.packages()))  
+      install.packages("RSQLite", repos = "http://cran.rstudio.com/") 
+    if (!"tidyverse" %in% rownames(installed.packages()))  
+      install.packages("tidyverse", repos = "http://cran.rstudio.com/")
+    if (!"dplyr" %in% rownames(installed.packages()))  
+      install.packages("dplyr", repos = "http://cran.rstudio.com/")
+suppressMessages(library("DBI"))
+suppressMessages(library("RSQLite"))
+suppressMessages(library("tidyverse"))
+suppressMessages(library("dplyr"))
 ```
 
 ## Q1 LA City Employee Payroll
@@ -32,6 +45,7 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
 
 ```{r}
 # read in data from database
+db <- dbConnect(RSQLite::SQLite(), "/home/m280-data/la_parking/LA_Parking_Citations.sqlite")
 
 
 
