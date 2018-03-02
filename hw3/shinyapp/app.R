@@ -2,16 +2,11 @@ library(shiny)
 library(tidyverse)
 library(ggplot2)
 
-# create the working directory for deploying app
-wd <- getwd()
-setwd(wd)
-
 # read in rds file
 payroll <- readRDS("payroll.rds")
 
 # remove all rows with NA and NaN values
 payroll <- payroll[complete.cases(payroll), ]
-
 
 # Question2 data: create the year-round pay data(long form)
 pay <- payroll %>% select(year, basePay, overtimePay, otherPay) %>%
