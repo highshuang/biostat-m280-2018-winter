@@ -30,7 +30,7 @@ output: html_document
 The `/home/m280-data/la_payroll/LA_City_Employee_Payroll.csv` file on teaching server contains payroll information of LA City employees in years 2013-2017. It was downloaded from [LA City Controller's Office](https://controllerdata.lacity.org/Payroll/City-Employee-Payroll/pazn-qyym). Make a Shiny app to facilitate exploratory data analysis. 
 
 1. For efficiency of the Shiny app, you should first pre-process, pare down, tidy, and save the data, e.g., as a compressed RDS file, to be used in the app.
-    ```{r, results = "hide"}
+    ```{r, results = "hide", comment=FALSE, warning=FALSE}
     # import data 
     payroll <- read_csv("/home/m280-data/la_payroll/LA_City_Employee_Payroll.csv")
     
@@ -107,9 +107,6 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
     db <- dbConnect(RSQLite::SQLite(),
                     "/home/m280-data/la_parking/LA_Parking_Citations_Extra.sqlite")
     
-    # show the data set name in the database db, "latix"
-    dbListTables(db)
-    
     # save latix to R
     latix <- dplyr::tbl(db, "latix")
     
@@ -170,7 +167,7 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
     
     ```
 
-* It is most likely to get a ticket on Wednesday and least likely to get a ticket on Sunday.
+* It is most likely to get a ticket on Tuesday(weekday=3) and least likely to get a ticket on Saturday(weekday=7).
 
     ```{r}
     # month day that most/least likey to get a ticket 
@@ -180,7 +177,7 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
       slice(c(1, n()))
     ```
 
-* It is most likely to get a ticket on May 12th and least likely to get a ticket on Nov 28th.
+* It is most likely to get a ticket on 22 and least likely to get a ticket on 31.
 
     ```{r}
     # month that most/least likey to get a ticket 
@@ -211,7 +208,7 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
     ```
 
 * There are 65 different colors of cars were ticketed.
-    ```{r}
+    ```{r, comment=FALSE, warning=FALSE}
     latix %>% group_by(Color) %>%
       summarize(count = n()) %>%
       arrange(desc(count)) %>% collect() %>%
@@ -221,7 +218,7 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
 * Color black(BK) attracted most tickets.
 
 5. What are the most common ticket types?
-    ```{r}
+    ```{r, comment=FALSE, warning=FALSE}
     latix %>% group_by(Violation_Description) %>%
       summarize(count = n()) %>% 
       arrange(desc(count)) %>% collect() %>%
@@ -235,25 +232,33 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
     latix %>% select(Issue_Year, Fine_amount) %>%
       filter(Issue_Year == 2015 | Issue_Year == 2016) %>%
       group_by(Issue_Year) %>%
-      summarize(sum = sum(Fine_amount))
+      summarize(sum = sum(Fine_amount, na.rm = TRUE))
+    
+    latix %>% select(Issue_Year, Fine_amount) %>%
+      filter(Issue_Year == 2015 | Issue_Year == 2016) %>%
+      summarize(total = sum(Fine_amount), na.rm = TRUE)
+    
     ```
 
-* 151006794$ was collected on parking ticket in 2015 and 123236136$ was collected on the parking ticket in 2016.
+* 151006794$ was collected on parking ticket in 2015 and 123236136$ was collected on the parking ticket in 2016. 274242930$ was collected in both 2015 and 2016.
 
-. Visualize any other information you are interested in.
-    ```{r}
-    
+7. Visualize any other information you are interested in.
+    ```{r, comment=FALSE, warning=FALSE}
     data <- latix %>% filter(Issue_Year == 2017, !is.na(Fine_amount), 
-                     !is.na(RP_State_Plate)) %>% 
+                             !is.na(RP_State_Plate)) %>% 
       select(RP_State_Plate, Fine_amount) %>% 
       group_by(RP_State_Plate) %>%
       summarize(sumFine = sum(Fine_amount, na.rm = TRUE)) %>% 
       arrange(desc(sumFine)) %>%
       collect() %>%
       slice(2:11) 
-    
+        
     head(data, n = 10)
-    
+    ```
+
+
+
+    ```{r, comment=FALSE, warning=FALSE}
     ggplot(data, aes(x = RP_State_Plate, y = sumFine)) +
     geom_col(fill = "aliceblue", color = "black") +
     labs(
