@@ -104,16 +104,14 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
 
     ```{r}
     # read in data from database
-    db <- dbConnect(RSQLite::SQLite(), "/home/m280-data/la_parking/LA_Parking_Citations_Extra.sqlite")
+    db <- dbConnect(RSQLite::SQLite(),
+                    "/home/m280-data/la_parking/LA_Parking_Citations_Extra.sqlite")
     
     # show the data set name in the database db, "latix"
     dbListTables(db)
     
     # save latix to R
     latix <- dplyr::tbl(db, "latix")
-    
-    # show all col
-    head(latix, n = 1, width = Inf) ### delete later 
     
     ```
 
@@ -132,12 +130,14 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
                              !is.na(Issue_Day), !is.na(Issue_Wday), 
                              !is.na(Issue_Hour))
     
-    date %>% distinct(Issue_Year, Issue_Month, Issue_Day) %>%
-      arrange(desc(Issue_Year), desc(Issue_Month), desc(Issue_Day)) %>% collect() %>%
+    date %>% distinct(Issue_Year, Issue_Month, Issue_Day, Issue_Hour,
+                      Issue_Minute) %>%
+      arrange(desc(Issue_Year), desc(Issue_Month), desc(Issue_Day),
+              desc(Issue_Hour), desc(Issue_Minute)) %>% collect() %>%
       slice(c(1, n()))
     ```
 
-* Tickets span from 2010/04/27 to 2017/12/30.
+* Tickets span from 2010/04/27 21:40 to 2017/12/30 1:41.
 
     ```{r}
     date  %>% group_by(Issue_Year) %>%
@@ -174,9 +174,9 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
 
     ```{r}
     # month day that most/least likey to get a ticket 
-    date %>% group_by(Issue_Month, Issue_Day) %>%
+    date %>% group_by(Issue_Day) %>%
       summarize(count = n()) %>% arrange(desc(count)) %>% 
-      ungroup() %>% collect() %>%
+      collect() %>%
       slice(c(1, n()))
     ```
 
@@ -242,19 +242,21 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
 
 . Visualize any other information you are interested in.
     ```{r}
-    print(latix, width = Inf, n = 1)
     
-    latix %>% filter(Issue_Year == 2017, !is.na(Fine_amount), 
+    data <- latix %>% filter(Issue_Year == 2017, !is.na(Fine_amount), 
                      !is.na(RP_State_Plate)) %>% 
       select(RP_State_Plate, Fine_amount) %>% 
       group_by(RP_State_Plate) %>%
       summarize(sumFine = sum(Fine_amount, na.rm = TRUE)) %>% 
       arrange(desc(sumFine)) %>%
       collect() %>%
-      slice(2:11) %>%
-      ggplot(aes(x = RP_State_Plate, y = sumFine)) +
-      geom_col(fill = "aliceblue", color = "black") +
-      labs(
+      slice(2:11) 
+    
+    head(data, n = 10)
+    
+    ggplot(data, aes(x = RP_State_Plate, y = sumFine)) +
+    geom_col(fill = "aliceblue", color = "black") +
+    labs(
           title = "2017 LA City Parking Ticket Fine from out-of-state vehicles",
           subtitle = "top 10 total fine contributring states",
           y = "Total Fine ($)",
