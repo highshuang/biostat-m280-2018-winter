@@ -63,7 +63,7 @@ saveRDS(payroll_small, path)
 
 * First, the rows with missing values are removed from the data for calculation convenience. Then, only the columns for our interests are selected to form a subset. For pay and cost related columns, the values are stored in character type with dollar sign and there are negative values, which are not meaningful. Because there are extremly negative values like -13042, it might be the typo about the sign. Thus, all the negative values are changed to absolute values. Then the subset is converted to rds file for later use in the shiny app.
 
-0. **Total payroll by LA City**. Visualize the total LA City payroll of each year, with breakdown into base pay, overtime pay, and other pay.
+2. **Total payroll by LA City**. Visualize the total LA City payroll of each year, with breakdown into base pay, overtime pay, and other pay.
 
 ```{r}
 
@@ -78,23 +78,23 @@ payroll_small %>% filter(totalPay == overtimePay + basePay + otherPay) %>%
 
 * In this dataset, the total pay is not always equal to sum of base pay, overtime pay and other pay. Try select only rows fulfilling this relation. Before filtering with this criterion, there are 297293 rows in the data set. After filtering, there are 167223 rows left. Almost half of the data are removed. Thus, it is not a good choice to only select the rows satisfying the criterion. In order to visualize the total LA City payroll of each year, annual total base pay, annual total overtime pay, and annual total other pay are stacked in a bar chart to reflect the annual total pay. The bar chart is shown under thea tab "total payroll plot".
 
-0. **Who earned most?** Visualize the payroll information (total payment with breakdown into base pay, overtime pay, and other pay, Department, Job Title) of the top $n$ highest paid LA City employees in a specific year. User specifies $n$ (default 10) and year (default 2017).
+3. **Who earned most?** Visualize the payroll information (total payment with breakdown into base pay, overtime pay, and other pay, Department, Job Title) of the top $n$ highest paid LA City employees in a specific year. User specifies $n$ (default 10) and year (default 2017).
 
 * The table with default 10 highest paid LA City employess in 2017 is shown under the tab "Individual Earn Most".
 
-0. **Which departments earn most?** Visualize the mean or median payroll, with breakdown into base pay, overtime pay, and other pay, of top $n$ earning departments. User specifies $n$ (default 5), year (default 2017), and method (mean or median, default median).
+4. **Which departments earn most?** Visualize the mean or median payroll, with breakdown into base pay, overtime pay, and other pay, of top $n$ earning departments. User specifies $n$ (default 5), year (default 2017), and method (mean or median, default median).
 
 * The table with default top 5 earning departments in 2017 based on median total Pay ranking is shown under the tab "Department Earn Most".
 
-0. **Which departments cost most?** Visualize the total payroll, with breakdown into base pay, overtime pay, and other pay, of top $n$ expensive departments. User specifies $n$ (default 5) and year (default 2017).
+5. **Which departments cost most?** Visualize the total payroll, with breakdown into base pay, overtime pay, and other pay, of top $n$ expensive departments. User specifies $n$ (default 5) and year (default 2017).
 
 * The table with default top 5 departments with most cost in 2017 based on total cost sum ranking is shown under tab "Department Cost Most".
 
-0. Visualize any other information you are interested in.
+6. Visualize any other information you are interested in.
 
 * On the side panel, users can type in any job (default Police Commander) they are interested in its annual salary distribution (default 2017) with or without density curve (default with curve). The plot is shown under tab "Dist for Annual Job salary".
 
-0. Publish your Shiny app to <https://www.shinyapps.io> and share the link.
+7. Publish your Shiny app to <https://www.shinyapps.io> and share the link.
 
 * [link to shinyapp.](https://highshuang.shinyapps.io/shinyapp/)
 
@@ -148,7 +148,7 @@ date  %>% group_by(Issue_Year) %>%
 * Year 2015 has the most data.
 
 
-0. When (which hour, weekday, month day, and month) are you most likely to get a ticket and when are you least likely to get a ticket?
+2. When (which hour, weekday, month day, and month) are you most likely to get a ticket and when are you least likely to get a ticket?
 ```{r}
 # hour that most/least likey to get a ticket 
 date %>% group_by(Issue_Hour) %>%
@@ -193,7 +193,7 @@ date %>% group_by(Issue_Month) %>%
 * It is most likely to get a ticket in March and least likely to get a ticket in November.
 
 
-0. Which car makes received most citations?
+3. Which car makes received most citations?
 ```{r}
 latix %>% group_by(Make) %>%
   summarize(count = n()) %>%
@@ -203,7 +203,7 @@ latix %>% group_by(Make) %>%
 
 * TOYT makes received most citations (669548 citations).
 
-0. How many different colors of cars were ticketed? Which color attracted most tickets?
+4. How many different colors of cars were ticketed? Which color attracted most tickets?
 ```{r}
 latix %>% filter(!is.na(Color)) %>%
   distinct(Color) %>%
@@ -220,7 +220,7 @@ latix %>% group_by(Color) %>%
 
 * Color black(BK) attracted most tickets.
 
-0. What are the most common ticket types?
+5. What are the most common ticket types?
 ```{r}
 latix %>% group_by(Violation_Description) %>%
   summarize(count = n()) %>% 
@@ -230,7 +230,7 @@ latix %>% group_by(Violation_Description) %>%
 
 * "NO PARK/STREET CLEAN"," "METER EXP" and "PREFERENTIAL PARKING" are the most common three ticket types.
 
-0. How much money was collected on parking tickets in 2015 and 2016?
+6. How much money was collected on parking tickets in 2015 and 2016?
 ```{r}
 latix %>% select(Issue_Year, Fine_amount) %>%
   filter(Issue_Year == 2015 | Issue_Year == 2016) %>%
@@ -240,7 +240,7 @@ latix %>% select(Issue_Year, Fine_amount) %>%
 
 * 151006794$ was collected on parking ticket in 2015 and 123236136$ was collected on the parking ticket in 2016.
 
-0. Visualize any other information you are interested in.
+7. Visualize any other information you are interested in.
 ```{r}
 print(latix, width = Inf, n = 1)
 
