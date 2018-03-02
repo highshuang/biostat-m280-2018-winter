@@ -55,26 +55,48 @@ payroll_small <- payroll %>%
                                               length(Average_Benefit_Cost))))
   )
 
-
 # convert payroll_small to rds file 
 wd <- getwd()
 path <- paste0(wd, "/shinyapp/payroll.rds")
 saveRDS(payroll_small, path)
 ```
 
-[link to shinyapp](https://highshuang.shinyapps.io/shinyapp/)
+* First, the rows with missing values are removed from the data for calculation convenience. Then, only the columns for our interests are selected to form a subset. For pay and cost related columns, the values are stored in character type with dollar sign and there are negative values, which are not meaningful. Because there are extremly negative values like -13042, it might be the typo about the sign. Thus, all the negative values are changed to absolute values. Then the subset is converted to rds file for later use in the shiny app.
 
 0. **Total payroll by LA City**. Visualize the total LA City payroll of each year, with breakdown into base pay, overtime pay, and other pay.
 
+```{r}
+
+# check the totalPay = overtimePay + basePay + otherPay assumption
+payroll_small %>% count()
+
+payroll_small %>% filter(totalPay == overtimePay + basePay + otherPay) %>%
+  count()
+
+```
+
+
+* In this dataset, the total pay is not always equal to sum of base pay, overtime pay and other pay. Try select only rows fulfilling this relation. Before filtering with this criterion, there are 297293 rows in the data set. After filtering, there are 167223 rows left. Almost half of the data are removed. Thus, it is not a good choice to only select the rows satisfying the criterion. In order to visualize the total LA City payroll of each year, annual total base pay, annual total overtime pay, and annual total other pay are stacked in a bar chart to reflect the annual total pay. The bar chart is shown under thea tab "total payroll plot".
+
 0. **Who earned most?** Visualize the payroll information (total payment with breakdown into base pay, overtime pay, and other pay, Department, Job Title) of the top $n$ highest paid LA City employees in a specific year. User specifies $n$ (default 10) and year (default 2017).
+
+* The table with default 10 highest paid LA City employess in 2017 is shown under the tab "Individual Earn Most".
 
 0. **Which departments earn most?** Visualize the mean or median payroll, with breakdown into base pay, overtime pay, and other pay, of top $n$ earning departments. User specifies $n$ (default 5), year (default 2017), and method (mean or median, default median).
 
+* The table with default top 5 earning departments in 2017 based on median total Pay ranking is shown under the tab "Department Earn Most".
+
 0. **Which departments cost most?** Visualize the total payroll, with breakdown into base pay, overtime pay, and other pay, of top $n$ expensive departments. User specifies $n$ (default 5) and year (default 2017).
+
+* The table with default top 5 departments with most cost in 2017 based on total cost sum ranking is shown under tab "Department Cost Most".
 
 0. Visualize any other information you are interested in.
 
+* On the side panel, users can type in any job (default Police Commander) they are interested in its annual salary distribution (default 2017) with or without density curve (default with curve). The plot is shown under tab "Dist for Annual Job salary".
+
 0. Publish your Shiny app to <https://www.shinyapps.io> and share the link.
+
+* [link to shinyapp.](https://highshuang.shinyapps.io/shinyapp/)
 
 ## Q2 LA City Parking War
 
