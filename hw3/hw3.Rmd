@@ -203,7 +203,7 @@ latix %>% group_by(Color) %>%
 latix %>% group_by(Violation_Description) %>%
   summarize(count = n()) %>% 
   arrange(desc(count)) %>% collect() %>%
-  slice(1:3)
+  head(n = 3)
 ```
 
 * "NO PARK/STREET CLEAN"," "METER EXP" and "PREFERENTIAL PARKING" are the most common three ticket types.
