@@ -220,17 +220,16 @@ latix %>% select(Issue_Year, Fine_amount) %>%
 ```{r}
 print(latix, width = Inf, n = 1)
 
-latix %>% filter(Issue_Year == 2014) %>% 
+latix %>% filter(Issue_Year == 2014, !is.na(Fine_amount), 
+                 !is.na(RP_State_Plate)) %>% 
   select(RP_State_Plate, Fine_amount) %>% 
-  filter(!is.na(Fine_amount), !is.na(RP_State_Plate)) %>%
   group_by(RP_State_Plate) %>%
   summarize(sumFine = sum(Fine_amount, na.rm = TRUE)) %>% 
   arrange(desc(sumFine)) %>%
   collect() %>%
   slice(1:10) %>%
   ggplot(aes(x = RP_State_Plate, y = sumFine)) +
-  geom_histogram(aes(y = ..density..), fill = "white", color = "black") +
-  geom_density(alpha = 0.2, fill = "#FF6666") +
+  geom_col() +
   labs(
       title = "histgram for annual salary of interested job",
       y = "Probability",
