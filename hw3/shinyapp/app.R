@@ -1,7 +1,5 @@
-
 library(shiny)
 library(tidyverse)
-library(magrittr)
 library(ggplot2)
 
 # create the working directory for deploying app
@@ -195,7 +193,7 @@ server <- function(input, output) {
          )
        
      }else {
-       ggplot(selectJob, aes(x = totalPay/1000)) +
+       ggplot(selectJob, aes(x = totalPay / 1000)) +
          geom_histogram(aes(y = ..density..), fill = "white", color = "black") +
          labs(
            title = "histgram for annual salary of interested job",
