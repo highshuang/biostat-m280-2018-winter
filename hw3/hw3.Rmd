@@ -61,6 +61,7 @@ wd <- getwd()
 path <- paste0(wd, "/shinyapp/payroll.rds")
 saveRDS(payroll_small, path)
 ```
+
 [link to shinyapp](https://highshuang.shinyapps.io/shinyapp/)
 
 0. **Total payroll by LA City**. Visualize the total LA City payroll of each year, with breakdown into base pay, overtime pay, and other pay.
@@ -101,6 +102,7 @@ head(latix, n = 1, width = Inf) ### delete later
 latix %>% filter(!is.na(Ticket_number)) %>% 
   count()
 ```
+
 * In total, there are 4044338 tickets in this data set, after removing the missing values. 
 ```{r}
 # remove missing dates
@@ -112,12 +114,14 @@ date %>% distinct(Issue_Year, Issue_Month, Issue_Day) %>%
   arrange(desc(Issue_Year), desc(Issue_Month), desc(Issue_Day)) %>% collect() %>%
   slice(c(1, n()))
 ```
+
 * Tickets span from 2010/04/27 to 2017/12/30.
 
 ```{r}
 date %>% filter(!is.na(Issue_Year)) %>% group_by(Issue_Year) %>%
   summarize(count = n()) %>% arrange(desc(count))
 ```
+
 * Year 2015 has the most data.
 
 
@@ -130,6 +134,7 @@ date %>% group_by(Issue_Hour) %>%
   slice(c(1, n()))
 
 ```
+
 * In the noon (hour = 12), it is most likely to get a ticket. During 5 a.m.(hour = 5), it is leastly likely to get a ticket.
 
 
@@ -141,6 +146,7 @@ date %>% group_by(Issue_Wday) %>%
   slice(c(1, n()))
 
 ```
+
 * It is most likely to get a ticket on Wednesday and least likely to get a ticket on Sunday.
 
 ```{r}
@@ -150,6 +156,7 @@ date %>% group_by(Issue_Month, Issue_Day) %>%
   ungroup() %>% collect() %>%
   slice(c(1, n()))
 ```
+
 * It is most likely to get a ticket on May 12th and least likely to get a ticket on Nov 28th.
 
 ```{r}
@@ -159,6 +166,7 @@ date %>% group_by(Issue_Month) %>%
   collect() %>%
   slice(c(1, n()))
 ```
+
 * It is most likely to get a ticket in March and least likely to get a ticket in November.
 
 
@@ -169,16 +177,90 @@ latix %>% group_by(Make) %>%
   arrange(desc(count)) %>% collect() %>%
   slice(1)
 ```
+
 * Toyota makes received most citations (669548 citations).
 
 0. How many different colors of cars were ticketed? Which color attracted most tickets?
 ```{r}
-latix %>% 
+latix %>% distinct(Color) %>%
+  count()
+```
+
+* There are 66 different colors of cars were ticketed.
+```{r}
+latix %>% group_by(Color) %>%
+  summarize(count = n()) %>%
+  arrange(desc(count)) %>% collect() %>%
+  slice(1)
+```
+
+* Color black attracted most tickets.
+
+0. What are the most common ticket types?
+```{r}
+latix %>% group_by(Violation_Description) %>%
+  summarize(count = n()) %>% 
+  arrange(desc(count)) %>% collect() %>%
+  slice(1:3)
+```
+
+* "NO PARK/STREET CLEAN"," "METER EXP" and "PREFERENTIAL PARKING" are the most common three ticket types.
+
+0. How much money was collected on parking tickets in 2015 and 2016?
+```{r}
+latix %>% select(Issue_Year, Fine_amount) %>%
+  filter(Issue_Year == 2015 | Issue_Year == 2016) %>%
+  group_by(Issue_Year) %>%
+  summarize(sum = sum(Fine_amount))
+```
+
+* 151006794$ was collected on parking ticket in 2015 and 123236136$ was collected on the parking ticket in 2016.
+
+0. Visualize any other information you are interested in.
+```{r}
+print(latix, width = Inf, n = 1)
+
+latix %>% filter(Issue_Year == 2014) %>% 
+  select(RP_State_Plate, Fine_amount) %>% 
+  filter(!is.na(Fine_amount), !is.na(RP_State_Plate)) %>%
+  group_by(RP_State_Plate) %>%
+  summarize(sumFine = sum(Fine_amount, na.rm = TRUE)) %>% 
+  arrange(desc(sumFine)) %>%
+  collect() %>%
+  slice(1:10) %>%
+  ggplot(aes(x = RP_State_Plate, y = sumFine)) +
+  geom_histogram(aes(y = ..density..), fill = "white", color = "black") +
+  geom_density(alpha = 0.2, fill = "#FF6666") +
+  labs(
+      title = "histgram for annual salary of interested job",
+      y = "Probability",
+      x = "Salary (thousand$)"
+      )
+
+  
+  select(Issue_Year, RP_State_Plate, Fine_amount) %>%
+  
+  
+       ggplot(pay, aes(x = year, y = value / 1000000, fill = type)) +
+       geom_col() +
+       labs(
+         x = "Year",
+         y = "Pay (milloion$)",
+         title = "LA City Employee Total Payroll")
+
+
+  
+  filter(!is.na(Issue_Year), !is.na(RP_State_Plate)) %>%
+  group_by(Issue_Year, RP_State_Plate) %>%
+  summarize(sumFine = sum(Fine_amount, na.rm = TRUE))
 ```
 
 
-0. What are the most common ticket types?
 
-0. How much money was collected on parking tickets in 2015 and 2016?
 
-0. Visualize any other information you are interested in.
+
+
+
+
+
+
