@@ -263,7 +263,7 @@ latix %>% filter(Issue_Year == 2017, !is.na(Fine_amount),
 
 ```
 
-* I am interested in 
+* For the 2017 LA city parking ticket fine, I am curious vehicles from which state other than california contribute to the total fine most. The top 10 states with the most fine in 2017 are reflected in the bar chart above.
 
 
 
