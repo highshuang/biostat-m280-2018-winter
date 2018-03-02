@@ -4,35 +4,11 @@ library(tidyverse)
 library(magrittr)
 library(ggplot2)
 
-# import data 
-payroll <- read_csv("/home/m280-data/la_payroll/LA_City_Employee_Payroll.csv")
+# create the working directory for deploying app
+wd <- getwd()
+setwd(wd)
 
-# fix column names (replace space by underscore)
-names(payroll) <- str_replace_all(names(payroll), " ", "_")
-
-# change "Other_Pay_(Payroll_Explorer) to otherPay
-names(payroll)[24] <- "otherPay"
-
-# select target variables
-payroll_small <- payroll %>%
-  transmute(year = Year, department = Department_Title,
-            job = Job_Class_Title,
-            totalPay = abs(as.numeric(substr(Total_Payments, 2, 
-                                             length(Total_Payments)))),
-            basePay = abs(as.numeric(substr(Base_Pay, 2, length(Base_Pay)))),
-            overtimePay = abs(as.numeric(substr(Overtime_Pay, 2, 
-                                                length(Overtime_Pay)))),  
-            otherPay = abs(as.numeric(substr(otherPay, 2, 
-                                             length(otherPay)))),
-            totalCost = abs(as.numeric(substr(Average_Benefit_Cost, 2, 
-                                              length(Average_Benefit_Cost)))),
-            healthCost = abs(as.numeric(substr(Average_Health_Cost, 2, 
-                                               length(Average_Health_Cost))))
-  )
-
-
-# convert payroll_small to rds file and read in as payroll data set
-saveRDS(payroll_small, "payroll.rds")
+# read in rds file
 payroll <- readRDS("payroll.rds")
 
 # remove all rows with NA and NaN values
@@ -63,7 +39,8 @@ ui <- fluidPage(
                     "Select a year :",
                     min = 2013,
                     max = 2017,
-                    value = 2017
+                    value = 2017, 
+                    sep = ""
         ),
         
         # Question3 Input: number of rows to view individual
@@ -176,6 +153,7 @@ server <- function(input, output) {
                 medianOtherPay)
        
        head(data_Q4_median, n = input$obs_Q4) 
+       
        
      }
    })
