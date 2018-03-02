@@ -118,8 +118,9 @@ date %>% distinct(Issue_Year, Issue_Month, Issue_Day) %>%
 * Tickets span from 2010/04/27 to 2017/12/30.
 
 ```{r}
-date %>% filter(!is.na(Issue_Year)) %>% group_by(Issue_Year) %>%
-  summarize(count = n()) %>% arrange(desc(count))
+date  %>% group_by(Issue_Year) %>%
+  summarize(count = n()) %>% arrange(desc(count)) %>% 
+  head(n = 1)
 ```
 
 * Year 2015 has the most data.
@@ -175,26 +176,27 @@ date %>% group_by(Issue_Month) %>%
 latix %>% group_by(Make) %>%
   summarize(count = n()) %>%
   arrange(desc(count)) %>% collect() %>%
-  slice(1)
+  head(n = 1)
 ```
 
-* Toyota makes received most citations (669548 citations).
+* TOYT makes received most citations (669548 citations).
 
 0. How many different colors of cars were ticketed? Which color attracted most tickets?
 ```{r}
-latix %>% distinct(Color) %>%
+latix %>% filter(!is.na(Color)) %>%
+  distinct(Color) %>%
   count()
 ```
 
-* There are 66 different colors of cars were ticketed.
+* There are 65 different colors of cars were ticketed.
 ```{r}
 latix %>% group_by(Color) %>%
   summarize(count = n()) %>%
   arrange(desc(count)) %>% collect() %>%
-  slice(1)
+  head(n = 1)
 ```
 
-* Color black attracted most tickets.
+* Color black(BK) attracted most tickets.
 
 0. What are the most common ticket types?
 ```{r}
@@ -220,40 +222,26 @@ latix %>% select(Issue_Year, Fine_amount) %>%
 ```{r}
 print(latix, width = Inf, n = 1)
 
-latix %>% filter(Issue_Year == 2014, !is.na(Fine_amount), 
+latix %>% filter(Issue_Year == 2017, !is.na(Fine_amount), 
                  !is.na(RP_State_Plate)) %>% 
   select(RP_State_Plate, Fine_amount) %>% 
   group_by(RP_State_Plate) %>%
   summarize(sumFine = sum(Fine_amount, na.rm = TRUE)) %>% 
   arrange(desc(sumFine)) %>%
   collect() %>%
-  slice(1:10) %>%
+  slice(2:11) %>%
   ggplot(aes(x = RP_State_Plate, y = sumFine)) +
-  geom_col() +
+  geom_col(fill = "aliceblue", color = "black") +
   labs(
-      title = "histgram for annual salary of interested job",
-      y = "Probability",
-      x = "Salary (thousand$)"
+      title = "2017 LA City Parking Ticket Fine from out-of-state vehicles",
+      subtitle = "top 10 total fine contributring states",
+      y = "Total Fine ($)",
+      x = "State"
       )
 
-  
-  select(Issue_Year, RP_State_Plate, Fine_amount) %>%
-  
-  
-       ggplot(pay, aes(x = year, y = value / 1000000, fill = type)) +
-       geom_col() +
-       labs(
-         x = "Year",
-         y = "Pay (milloion$)",
-         title = "LA City Employee Total Payroll")
-
-
-  
-  filter(!is.na(Issue_Year), !is.na(RP_State_Plate)) %>%
-  group_by(Issue_Year, RP_State_Plate) %>%
-  summarize(sumFine = sum(Fine_amount, na.rm = TRUE))
 ```
 
+* I am interested in 
 
 
 
