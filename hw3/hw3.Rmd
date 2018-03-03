@@ -247,19 +247,19 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
     date %>% group_by(Issue_Month) %>%
       summarize(count = n()) %>% arrange(desc(count)) %>% 
       collect() %>%
-      ggplot(aes(x = Issue_Day, y = count)) +
-      scale_x_continuous(breaks = seq(1, 31, by = 1)) +
-      coord_cartesian(ylim = c(100000, 150000)) +
+      ggplot(aes(x = Issue_Month, y = count)) +
+      scale_x_continuous(breaks = seq(1, 12, by = 1)) +
+      coord_cartesian(ylim = c(174000, 400000)) + 
       geom_bar(stat="identity", fill = "aliceblue", color = "black") +
       labs(
-        x = "Month Day",
+        x = "Month",
         y = "number of tickets",
-        title = "bar chart for tickets issued each month day"
+        title = "bar chart for tickets issued each month"
       )
       
     ```
 
-* It is most likely to get a ticket in March and least likely to get a ticket in November.
+* It is most likely to get a ticket in March and least likely to get a ticket in November. The bar plot also supports the conclusion.
 
 
 3. Which car makes received most citations?
@@ -268,9 +268,23 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
       summarize(count = n()) %>%
       arrange(desc(count)) %>% collect() %>%
       head(n = 1)
+    
+    latix %>% group_by(Make) %>%
+      summarize(count = n()) %>%
+      arrange(desc(count)) %>% collect() %>%
+      head() %>%
+      ggplot(aes(x = Make, y = count)) +
+      geom_bar(stat="identity", fill = "aliceblue", color = "black") +
+      labs(
+        x = "Car brand",
+        y = "number of tickets",
+        title = "bar chart for tickets issued for different car brand",
+        subtitle = "top 10 brands"
+      )
+      
     ```
 
-* TOYT makes received most citations (669548 citations).
+* TOYT makes received most citations (669548 citations). The bar chart also supports the conclusion.
 
 4. How many different colors of cars were ticketed? Which color attracted most tickets?
     ```{r}
@@ -285,9 +299,25 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
       summarize(count = n()) %>%
       arrange(desc(count)) %>% collect() %>%
       head(n = 1)
+
+    latix %>% group_by(Color) %>%
+      summarize(count = n()) %>%
+      arrange(desc(count)) %>% collect() %>%
+      head(n = 10) %>%
+      ggplot(aes(x = Color, y = count)) +
+      geom_bar(stat="identity", fill = "aliceblue", color = "black") +
+      labs(
+        x = "Color",
+        y = "number of tickets",
+        title = "bar chart for tickets issued for cars with different color",
+        subtitle = "top 10 colors"
+      )
+      
+    
+    
     ```
 
-* Color black(BK) attracted most tickets.
+* Color black(BK) attracted most tickets.The bar chart also supports the conclusion.
 
 5. What are the most common ticket types?
     ```{r, comment=FALSE, warning=FALSE}
@@ -295,9 +325,24 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
       summarize(count = n()) %>% 
       arrange(desc(count)) %>% collect() %>%
       head(n = 3)
+    
+    latix %>% group_by(Violation_Description) %>%
+      summarize(count = n()) %>% 
+      arrange(desc(count)) %>% collect() %>%
+      head(n = 10) %>%
+      ggplot(aes(x = Violation_Description, y = count)) +
+      geom_bar(stat="identity", fill = "aliceblue", color = "black") +
+      labs(
+        x = "violation descripition",
+        y = "number of tickets",
+        title = "bar chart for tickets issued for types of violation",
+        subtitle = "top 10 violation descripition"
+      ) +
+      coord_flip()
+      
     ```
 
-* "NO PARK/STREET CLEAN"," "METER EXP" and "PREFERENTIAL PARKING" are the most common three ticket types.
+* "NO PARK/STREET CLEAN"," "METER EXP" and "PREFERENTIAL PARKING" are the most common three ticket types. The bar chart also supports the conclusion.
 
 6. How much money was collected on parking tickets in 2015 and 2016?
     ```{r}
