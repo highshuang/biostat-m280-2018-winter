@@ -118,6 +118,7 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
     # total ticket amount: 4044338
     latix %>% filter(!is.na(Ticket_number)) %>% 
       count()
+    
     ```
 
 * In total, there are 4044338 tickets in this data set, after removing the missing values. 
@@ -140,9 +141,23 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
     date  %>% group_by(Issue_Year) %>%
       summarize(count = n()) %>% arrange(desc(count)) %>% 
       head(n = 1)
+    
+    date  %>% group_by(Issue_Year) %>%
+      summarize(count = n()) %>% arrange(desc(count)) %>% collect() %>%
+      ggplot(aes(x = Issue_Year, y = count)) +
+      scale_x_continuous(breaks = seq(2010, 2017, by = 1)) +
+      geom_bar(stat="identity", fill = "aliceblue", color = "black") +
+      labs(
+        x = "Year",
+        y = "number of tickets",
+        title = "bar chart for tickets issued each year"
+      )
+    
+    
+    
     ```
 
-* Year 2015 has the most data.
+* Year 2015 has the most data. The bar chart also support the conclusion.
 
 
 2. When (which hour, weekday, month day, and month) are you most likely to get a ticket and when are you least likely to get a ticket?
@@ -153,9 +168,21 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
       collect() %>%
       slice(c(1, n()))
     
+    date %>% group_by(Issue_Hour) %>%
+      summarize(count = n()) %>% arrange(desc(count)) %>% 
+      collect() %>%
+      ggplot(aes(x = Issue_Hour, y = count)) +
+      scale_x_continuous(breaks = seq(1, 23, by = 1)) +
+      geom_bar(stat="identity", fill = "aliceblue", color = "black") +
+      labs(
+        x = "Hour",
+        y = "number of tickets",
+        title = "bar chart for tickets issued each hour"
+      )
+    
     ```
 
-* In the noon (hour = 12), it is most likely to get a ticket. During 5 a.m.(hour = 5), it is leastly likely to get a ticket.
+* In the noon (hour = 12), it is most likely to get a ticket. During 5 a.m.(hour = 5), it is leastly likely to get a ticket. The bar chart supports the conclusion.
 
 
     ```{r}
@@ -165,9 +192,24 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
       collect() %>%
       slice(c(1, n()))
     
+    date %>% group_by(Issue_Wday) %>%
+      summarize(count = n()) %>% arrange(desc(count)) %>% 
+      collect() %>%
+      ggplot(aes(x = Issue_Wday, y = count)) +
+      scale_x_continuous(breaks = seq(1, 7, by = 1)) +
+      geom_bar(stat="identity", fill = "aliceblue", color = "black") +
+      labs(
+        x = "Weekday",
+        y = "number of tickets",
+        title = "bar chart for tickets issued each weekday"
+      )
+    
+    
+    
+    
     ```
 
-* It is most likely to get a ticket on Tuesday(weekday=3) and least likely to get a ticket on Saturday(weekday=7).
+* It is most likely to get a ticket on Tuesday(weekday=3) and least likely to get a ticket on Saturday(weekday=7). The bar chart also supports the conclusion.
 
     ```{r}
     # month day that most/least likey to get a ticket 
@@ -175,9 +217,25 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
       summarize(count = n()) %>% arrange(desc(count)) %>% 
       collect() %>%
       slice(c(1, n()))
+    
+    
+    date %>% group_by(Issue_Day) %>%
+      summarize(count = n()) %>% arrange(desc(count)) %>% 
+      collect() %>%
+      ggplot(aes(x = Issue_Day, y = count)) +
+      scale_x_continuous(breaks = seq(1, 31, by = 1)) +
+      coord_cartesian(ylim = c(100000, 150000)) +
+      geom_bar(stat="identity", fill = "aliceblue", color = "black") +
+      labs(
+        x = "Month Day",
+        y = "number of tickets",
+        title = "bar chart for tickets issued each month day"
+      )
+    
+
     ```
 
-* It is most likely to get a ticket on 22 and least likely to get a ticket on 31.
+* It is most likely to get a ticket on 22 and least likely to get a ticket on 31. The bar chart also supports the conclusion.
 
     ```{r}
     # month that most/least likey to get a ticket 
@@ -185,6 +243,20 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
       summarize(count = n()) %>% arrange(desc(count)) %>% 
       collect() %>%
       slice(c(1, n()))
+    
+    date %>% group_by(Issue_Month) %>%
+      summarize(count = n()) %>% arrange(desc(count)) %>% 
+      collect() %>%
+      ggplot(aes(x = Issue_Day, y = count)) +
+      scale_x_continuous(breaks = seq(1, 31, by = 1)) +
+      coord_cartesian(ylim = c(100000, 150000)) +
+      geom_bar(stat="identity", fill = "aliceblue", color = "black") +
+      labs(
+        x = "Month Day",
+        y = "number of tickets",
+        title = "bar chart for tickets issued each month day"
+      )
+      
     ```
 
 * It is most likely to get a ticket in March and least likely to get a ticket in November.
