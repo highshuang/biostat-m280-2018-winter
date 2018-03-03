@@ -112,10 +112,17 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
 # read in data from database
 db <- dbConnect(RSQLite::SQLite(),
                 "/home/m280-data/la_parking/LA_Parking_Citations_Extra.sqlite")
+<<<<<<< HEAD
+    
+# save latix to R
+latix <- dplyr::tbl(db, "latix")
+    
+=======
         
 # save latix to R
 latix <- dplyr::tbl(db, "latix")
         
+>>>>>>> develop
     ```
 
 1. How many tickets are in this data set? Which time period do these tickets span? Which years have most data?
