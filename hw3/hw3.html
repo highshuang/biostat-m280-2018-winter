@@ -143,21 +143,29 @@ suppressMessages(library(&quot;dplyr&quot;))
 <h2>Q1 LA City Employee Payroll</h2>
 <p>The <code>/home/m280-data/la_payroll/LA_City_Employee_Payroll.csv</code> file on teaching server contains payroll information of LA City employees in years 2013-2017. It was downloaded from <a href="https://controllerdata.lacity.org/Payroll/City-Employee-Payroll/pazn-qyym">LA City Controller’s Office</a>. Make a Shiny app to facilitate exploratory data analysis.</p>
 <ol style="list-style-type: decimal">
-<li><p>For efficiency of the Shiny app, you should first pre-process, pare down, tidy, and save the data, e.g., as a compressed RDS file, to be used in the app.</p>
+<li>For efficiency of the Shiny app, you should first pre-process, pare down, tidy, and save the data, e.g., as a compressed RDS file, to be used in the app.</li>
+</ol>
 <pre class="r"><code># import data 
 payroll &lt;- read_csv(&quot;/home/m280-data/la_payroll/LA_City_Employee_Payroll.csv&quot;)</code></pre>
-<pre><code>FALSE Parsed with column specification:
-FALSE cols(
-FALSE   .default = col_character(),
-FALSE   Year = col_integer(),
-FALSE   `Payroll Department` = col_integer(),
-FALSE   `Record Number` = col_integer(),
-FALSE   MOU = col_integer(),
-FALSE   `FMS Department` = col_integer(),
-FALSE   `Job Class` = col_integer()
-FALSE )</code></pre>
-<pre><code>FALSE See spec(...) for full column specifications.</code></pre>
-<pre class="r"><code># fix column names (replace space by underscore)
+<pre><code>## Parsed with column specification:
+## cols(
+##   .default = col_character(),
+##   Year = col_integer(),
+##   `Payroll Department` = col_integer(),
+##   `Record Number` = col_integer(),
+##   MOU = col_integer(),
+##   `FMS Department` = col_integer(),
+##   `Job Class` = col_integer()
+## )</code></pre>
+<pre><code>## See spec(...) for full column specifications.</code></pre>
+<pre><code>## Warning in rbind(names(probs), probs_f): number of columns of result is not
+## a multiple of vector length (arg 1)</code></pre>
+<pre><code>## Warning: 156434 parsing failures.
+## row # A tibble: 5 x 5 col     row col           expected   actual     file                           expected   &lt;int&gt; &lt;chr&gt;         &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;                          actual 1  7286 Record Number an integer 2460645277 '/home/m280-data/la_payroll/L… file 2  7421 Record Number an integer 2483241863 '/home/m280-data/la_payroll/L… row 3  7842 Record Number an integer 2491549115 '/home/m280-data/la_payroll/L… col 4  7977 Record Number an integer 2558537260 '/home/m280-data/la_payroll/L… expected 5 10996 Record Number an integer 2801300113 '/home/m280-data/la_payroll/L…
+## ... ................. ... .......................................................................... ........ .......................................................................... ...... .......................................................................... .... .......................................................................... ... .......................................................................... ... .......................................................................... ........ ..........................................................................
+## See problems(...) for more details.</code></pre>
+<pre><code>```r
+# fix column names (replace space by underscore)
 names(payroll) &lt;- str_replace_all(names(payroll), &quot; &quot;, &quot;_&quot;)
 
 # change &quot;Other_Pay_(Payroll_Explorer) to otherPay
@@ -169,20 +177,22 @@ payroll_small &lt;- payroll %&gt;%
             job = Job_Class_Title,
             totalPay = abs(as.numeric(substr(Total_Payments, 2, 
                                              length(Total_Payments)))),
-            basePay = abs(as.numeric(substr(Base_Pay, 2, length(Base_Pay)))),
+            basePay = abs(as.numeric(substr(Base_Pay, 2, 
+                                            length(Base_Pay)))),
             overtimePay = abs(as.numeric(substr(Overtime_Pay, 2, 
                                                 length(Overtime_Pay)))),  
             otherPay = abs(as.numeric(substr(otherPay, 2, 
                                              length(otherPay)))),
             totalCost = abs(as.numeric(substr(Average_Benefit_Cost, 2, 
-                                              length(Average_Benefit_Cost))))
+                                              length(Average_Benefit_Cost)))
+                            )
   )
 
 # convert payroll_small to rds file 
 wd &lt;- getwd()
 path &lt;- paste0(wd, &quot;/shinyapp/payroll.rds&quot;)
-saveRDS(payroll_small, path)</code></pre></li>
-</ol>
+saveRDS(payroll_small, path)
+```</code></pre>
 <ul>
 <li>First, the rows with missing values are removed from the data for calculation convenience. Then, only the columns for our interests are selected to form a subset. For pay and cost related columns, the values are stored in character type with dollar sign and there are negative values, which are not meaningful. Because there are extremly negative values like -13042, it might be the typo about the sign. Thus, all the negative values are changed to absolute values. Then the subset is converted to rds file for later use in the shiny app.</li>
 </ul>
@@ -238,14 +248,12 @@ payroll_small %&gt;% count()</code></pre>
 <div id="q2-la-city-parking-war" class="section level2">
 <h2>Q2 LA City Parking War</h2>
 <p>The SQLite database <code>/home/m280-data/la_parking/LA_Parking_Citations.sqlite</code> on teaching server contains information about parking tickets in LA City. It was downloaded from <a href="https://data.lacity.org/A-Well-Run-City/Parking-Citations/wjz9-h9np">LA Open Data Portal</a>. Connect to the database and answer following questions using plots and summary statistics. In this exercise, you are <strong>not</strong> allowed to load whole data into memory. Use the <em>transform in database, plot in R</em> strategy.</p>
-<pre><code>```r
-# read in data from database
+<pre class="r"><code># read in data from database
 db &lt;- dbConnect(RSQLite::SQLite(),
                 &quot;/home/m280-data/la_parking/LA_Parking_Citations_Extra.sqlite&quot;)
-
+        
 # save latix to R
-latix &lt;- dplyr::tbl(db, &quot;latix&quot;)
-```</code></pre>
+latix &lt;- dplyr::tbl(db, &quot;latix&quot;)</code></pre>
 <ol style="list-style-type: decimal">
 <li><p>How many tickets are in this data set? Which time period do these tickets span? Which years have most data?</p>
 <pre class="r"><code># total ticket amount: 4044338
