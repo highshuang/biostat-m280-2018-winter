@@ -23,6 +23,8 @@ airports_tbl <- tbl(sc, 'airports')
 airports_tbl %>% print(width = Inf)
 
 
+
+
 # total data point by year
 out <- flights_tbl %>%
   group_by(year) %>%
