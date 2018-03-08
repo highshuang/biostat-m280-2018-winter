@@ -6,10 +6,9 @@ library(ggplot2)
 # specify where spark is
 Sys.setenv(SPARK_HOME="/usr/lib/spark")
 config <- spark_config()
-sc <- spark_connect(master = "yarn-client", config = config)
 
-# show tables 
-sc   
+# start spark connection 
+sc <- spark_connect(master = "yarn-client", config = config)
 
 
 # Cache flights Hive table into Spark
