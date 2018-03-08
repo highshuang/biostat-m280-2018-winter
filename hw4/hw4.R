@@ -35,5 +35,6 @@ out <- flights_tbl %>%
   arrange(year) %>%
   collect()
 
-
+# close connection
+spark_disconnect_all()
 
