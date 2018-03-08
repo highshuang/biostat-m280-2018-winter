@@ -10,11 +10,15 @@ config <- spark_config()
 # start spark connection 
 sc <- spark_connect(master = "yarn-client", config = config)
 
-
 # Cache flights Hive table into Spark
 #tbl_cache(sc, 'flights')
 flights_tbl <- tbl(sc, 'flights') #create pointer to the table
 flights_tbl %>% print(width = Inf)
+
+# Cache airlines Hive table into Spark
+#tbl_cache(sc, 'airlines')
+airlines_tbl <- tbl(sc, 'airlines')
+airlines_tbl %>% print(width = Inf)
 
 # Cache airports Hive table into Spark
 #tbl_cache(sc, 'airports')
