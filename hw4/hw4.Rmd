@@ -60,10 +60,58 @@ airports <- airports_tbl %>%
 Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io/rep-res-web/lectures/making-maps-with-R.html) helpful.
 
 ```{r}
+# destinations with corresponding number of flights
+dest <- flight_2008 %>% group_by(dest) %>%
+  summarize(n = count()) %>%
+  select("airport" = dest, n)
+
+origin <- flight_2008 %>% 
+
 busydest <- flights_tbl %>% filter(!is.na(dest), year == 2008) %>%
   group_by(dest) %>% summarize(n = count()) %>%
   arrange(desc(n)) %>% collect() %>%
   slice(1:10)
+
+
+      group_by(dest) %>%
+      summarise(n = n()) %>%
+      collect() %>%
+      arrange(desc(n)) %>%
+      select("airport" = dest, n)
+    
+    ori.count <- left_join(flights.r, airports.r, by = c("origin" = "faa")) %>%
+      group_by(origin) %>%
+      summarise(n = n()) %>%
+      collect() %>%
+      arrange(desc(n)) %>%
+      select("airport" = origin, n)
+    
+    combine <- bind_rows(dest.count, ori.count) %>%
+      group_by(airport) %>%
+      summarise(sum = sum(n)) %>%
+      arrange(desc(sum)) %>%
+      head(10)
+    
+    getlocation <- airports_tbl %>%
+      select(faa, lat, lon, name) %>%
+      filter(faa %in% combine$airport) %>%
+      collect()
+    
+    busiestairport <- left_join(combine, getlocation, by = c("airport" = "faa")) 
+    
+    busiest.airport.mod <- busiestairport %>%
+      transmute(airport = airport, total.flights = sum, lat = as.numeric(lat), 
+                lon = as.numeric(lon), name = name)
+    
+      map <- get_map(location = 'united states', zoom = 4)
+      ggmap(map) + 
+        geom_point(data = busiest.airport.mod, aes(x = lon, y = lat, 
+                                                   size = total.flights), 
+                   alpha = 0.5) +
+        labs(x = "Longitude", y = "Latitude", 
+             title = "Top 10 Busiest Airports in 2008") +
+        geom_label_repel(data = busiest.airport.mod, 
+                         label = busiest.airport.mod$airport, size = 2)
 
 
 
