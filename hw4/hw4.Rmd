@@ -50,9 +50,6 @@ flight_2008 <- flights_tbl %>% filter(year == 2008) %>%
 airports <- airports_tbl %>%
   select(faa, lat, lon, name)
 
-
-    
-
 ```
 
 
@@ -65,7 +62,14 @@ dest <- flight_2008 %>% group_by(dest) %>%
   summarize(n = count()) %>%
   select("airport" = dest, n)
 
-origin <- flight_2008 %>% 
+origin <- flight_2008 %>% group_by(dest) %>%
+  summarize(n = count()) %>%
+  select("airport" = origin, n)
+
+airport_flight <- bind_rows(origin, dest) %>%
+  group_by(airport) %>%
+  summarize(sum = sum(n)) %>%
+  
 
 busydest <- flights_tbl %>% filter(!is.na(dest), year == 2008) %>%
   group_by(dest) %>% summarize(n = count()) %>%
@@ -73,18 +77,6 @@ busydest <- flights_tbl %>% filter(!is.na(dest), year == 2008) %>%
   slice(1:10)
 
 
-      group_by(dest) %>%
-      summarise(n = n()) %>%
-      collect() %>%
-      arrange(desc(n)) %>%
-      select("airport" = dest, n)
-    
-    ori.count <- left_join(flights.r, airports.r, by = c("origin" = "faa")) %>%
-      group_by(origin) %>%
-      summarise(n = n()) %>%
-      collect() %>%
-      arrange(desc(n)) %>%
-      select("airport" = origin, n)
     
     combine <- bind_rows(dest.count, ori.count) %>%
       group_by(airport) %>%
