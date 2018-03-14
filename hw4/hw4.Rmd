@@ -58,37 +58,33 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
 
 ```{r}
 # destinations with corresponding number of flights
-dest <- flight_2008 %>% group_by(dest) %>%
-  summarize(n = count()) %>%
-  select("airport" = dest, n)
+dest <- flight_2008 %>% filter(!is.na(dest)) %>%
+  group_by(dest) %>%
+  summarize(n_dest = count()) %>%
+  select(dest, n_dest)
 
-origin <- flight_2008 %>% group_by(dest) %>%
-  summarize(n = count()) %>%
-  select("airport" = origin, n)
+# origin with corresponding number of flights
+origin <- flight_2008 %>% filter(!is.na(origin)) %>%
+  group_by(origin) %>%
+  summarize(n_ori = count()) %>%
+  select(origin, n_ori)
 
-airport_flight <- bind_rows(origin, dest) %>%
-  group_by(airport) %>%
-  summarize(sum = sum(n)) %>%
-  
+# left join to get number of flights fly in and out the same airport
+# show only first top 10 busy airport
+busyair <- left_join(dest, origin, by = c("dest" == "origin")) %>%
+  transmute(
+    airport = dest,
+    numFlight = n_dest + n_ori
+  ) %>% arrange(desc(numFlight)) %>%
+  collect() %>%
+  head(10)
 
-busydest <- flights_tbl %>% filter(!is.na(dest), year == 2008) %>%
-  group_by(dest) %>% summarize(n = count()) %>%
-  arrange(desc(n)) %>% collect() %>%
-  slice(1:10)
+# get airport location info
+busyair_loc <- airports %>% filter(faa %in% busyair$airport) %>%
+  collect()
 
 
-    
-    combine <- bind_rows(dest.count, ori.count) %>%
-      group_by(airport) %>%
-      summarise(sum = sum(n)) %>%
-      arrange(desc(sum)) %>%
-      head(10)
-    
-    getlocation <- airports_tbl %>%
-      select(faa, lat, lon, name) %>%
-      filter(faa %in% combine$airport) %>%
-      collect()
-    
+
     busiestairport <- left_join(combine, getlocation, by = c("airport" = "faa")) 
     
     busiest.airport.mod <- busiestairport %>%
