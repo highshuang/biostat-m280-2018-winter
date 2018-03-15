@@ -144,8 +144,8 @@ busyRoute <- flight_2008 %>% filter(!is.na(origin), !is.na(dest)) %>%
 ori_loc <- airports %>%
   filter(faa %in% busyRoute$origin) %>% 
   select(
-    "ori_lat" = lat,
-    "ori_lon" = lon,
+    "ori_lat" = as.numeric(lat),
+    "ori_lon" = as.numeric(lon),
     "ori_faa" = faa,
     "ori_name" = name
   ) %>%
@@ -158,8 +158,8 @@ ori_loc <- left_join(ori_loc, busyRoute, by = c("ori_faa" = "origin")) %>%
 dest_loc <- airports %>%
   filter(faa %in% busyRoute$dest) %>%
   select(
-    "dest_lat" = lat,
-    "dest_lon" = lon,
+    "dest_lat" = as.numeric(lat),
+    "dest_lon" = as.numeric(lon),
     "dest_faa" = faa,
     "dest_name" = name
   ) %>%
