@@ -131,19 +131,16 @@ ggmap(usa) +
 busyRoute <- flight_2008 %>% filter(!is.na(origin), !is.na(dest)) %>%
   group_by(origin, dest) %>%
   summarize(n = n()) %>%
+  collect() %>%
+  arrange(desc(n)) %>%
+  slice(1:10)
+
+# get the orignin info 
+ori_loc <- airports %>%
+  filter(faa %in% busyRoute$origin) %>%
+  collect()
 
 
-
-   ##obtain top 10 busiest routes
-    route.count <- flights_tbl %>%
-      filter(origin != "Origin") %>%
-      select(year, origin, dest) %>%
-      filter(year == 2002) %>%
-      group_by(origin, dest) %>%
-      summarise(n = n()) %>%
-      collect() %>%
-      arrange(desc(n)) %>%
-      head(10)
     
     #obtain the location of origin
     get.ori.location <- airports_tbl %>%
