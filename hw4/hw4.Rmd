@@ -234,12 +234,13 @@ ggplot() +
   geom_line(data = air_LAX, aes(x = date, y = n)) +
   labs(title = "LAX air traffic") +
   geom_label(data = labels, aes(x = as.Date(dates, "%Y-%m-%d"), y = n, 
-                                label = num), 
-             size = 6) +
-  coord_fixed(2.3) 
+                                label = num_lab), size = 5) + 
+  coord_fixed(1.4) 
 
 ```
 
+* The plot is reporduced above. The flights of LAX airport from 1998 to 2008 are used for this question. Number of flights for each day from 1998 to 2008 are plotted in the graph. There are 5 sudden jump in the graph, which indicates sudden increase or decrease around certain date. This might be related to the significant events happen around the given dates. 
+Firt sudden decrease happened in 2001-09-11, when 911 Attacks happened. 
 
     (b). Visualize and explain seasonal effects.
     
