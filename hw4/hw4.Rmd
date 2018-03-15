@@ -135,28 +135,38 @@ busyRoute <- flight_2008 %>% filter(!is.na(origin), !is.na(dest)) %>%
   arrange(desc(n)) %>%
   slice(1:10)
 
-# get the orignin info 
+# get the origin info 
 ori_loc <- airports %>%
-  filter(faa %in% busyRoute$origin) %>%
+  filter(faa %in% busyRoute$origin) %>% 
+  select(
+    "ori_lat" = lat,
+    "ori_lon" = lon,
+    "ori_faa" = faa,
+    "ori_name" = name
+  ) %>%
   collect()
 
+ori_loc <- left_join(ori_loc, busyRoute, by = c("ori_faa" = "origin")) %>%
+  select(ori_lat, ori_lon, ori_faa, ori_name, dest, n)
 
-    
-    #obtain the location of origin
-    get.ori.location <- airports_tbl %>%
-      select(faa, lat, lon) %>%
-      filter(faa %in% route.count$origin) %>%
-      collect()
-    get.ori.location <- left_join(route.count, get.ori.location, 
-                                  by = c("origin" = "faa"))
-    
-    #obtain the location of destination
-    get.dest.location <- airports_tbl %>%
-      select(faa, lat, lon) %>%
-      filter(faa %in% route.count$dest) %>%
-      collect()
-    get.both.locations <- left_join(get.ori.location, get.dest.location, 
-                                  by = c("dest" = "faa"))
+# get the destination info 
+dest_loc <- airports %>%
+  filter(faa %in% busyRoute$dest) %>%
+  select(
+    "dest_lat" = lat,
+    "dest_lon" = lon,
+    "dest_faa" = faa,
+    "dest_name" = name
+  ) %>%
+  collect()
+
+# combine both origin and dest locaction info 
+busyRoute_loc <- left_join(ori_loc, dest_loc, by = c("dest" = "dest_faa"))
+
+# airport location 
+airport_loc <- busyRoute_loc %>% 
+  
+  
     
     route.origin <- route.count$origin
     route.dest <- route.count$dest
