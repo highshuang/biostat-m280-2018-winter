@@ -212,17 +212,15 @@ route_plot +
     (a). Reproduce above plot. Visualize and explain some prominent features you observe. For example, what happened at points 1-5?
     
 ```{r}
+# filter flights from 1998 to 2008 within LAX 
 air_LAX <- flights_tbl %>%
   filter(origin == "LAX" | dest == "LAX") %>%
   filter(year <= 2008, year >= 1998) %>%
   select(year, month, dayofmonth, origin, dest) %>%
   group_by(year, month, dayofmonth) %>%
-  summarize(n = n()) %>% collect()
-
-date <- air_LAX %>% 
-  transmute(
-    date = make_date(year = year, month = month, day = dayofmonth)
-  )
+  summarize(n = n())  %>%
+  collect() %>%
+  mutate(date = make_date(year = year, month = month, day = dayofmonth))
 
 # create 5 labels for the turning points
 dates <- c("2001-09-11", "2004-11-01", "2004-06-01", "2008-01-01", 
@@ -231,25 +229,21 @@ n <- c(1100, 900, 950, 1200, 1200)
 num_lab <- c("1", "2", "3", "4", "5")
 labels <- data.frame(num_lab, dates, n)
     
+# reporduce the plot
 ggplot() +
   geom_line(data = air_LAX, aes(x = date, y = n)) +
   labs(title = "LAX air traffic") +
   geom_label(data = labels, aes(x = as.Date(dates, "%Y-%m-%d"), y = n, 
                                 label = num), 
              size = 6) +
-  coord_fixed(2.3) + theme_bw()
-  
-ggplot() +
-  geom_line(data = air_LAX, aes(x = date$date, y = n)) +
-  labs(
-    x = "date",
-    y = "n",
-    title = "LAX air traffic")
+  coord_fixed(2.3) 
 
 ```
 
 
     (b). Visualize and explain seasonal effects.
+    
+    
   
     (c). Visualize and explain weekly effects.
   
