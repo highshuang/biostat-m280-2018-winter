@@ -219,13 +219,13 @@ air_LAX <- flights_tbl %>%
   select(year, month, dayofmonth, origin, dest) %>%
   group_by(year, month, dayofmonth) %>%
   summarize(n = n())  %>%
-  collect() %>%
+  collect() %>% 
   mutate(date = make_date(year = year, month = month, day = dayofmonth))
 
 # create 5 labels for the turning points
-dates <- c("2001-09-11", "2004-11-01", "2004-06-01", "2008-01-01", 
+dates <- c("2001-09-11", "2004-11-25", "2004-07-04", "2008-01-01", 
            "2001-01-01")
-n <- c(1100, 900, 950, 1200, 1200)
+n <- c(1100, 1000, 1050, 1200, 1200)
 num_lab <- c("1", "2", "3", "4", "5")
 labels <- data.frame(num_lab, dates, n)
     
@@ -239,10 +239,35 @@ ggplot() +
 
 ```
 
-* The plot is reporduced above. The flights of LAX airport from 1998 to 2008 are used for this question. Number of flights for each day from 1998 to 2008 are plotted in the graph. There are 5 sudden jump in the graph, which indicates sudden increase or decrease around certain date. This might be related to the significant events happen around the given dates. 
-Firt sudden decrease happened in 2001-09-11, when 911 Attacks happened. 
+* The plot is reporduced above. The flights of LAX airport from 1998 to 2008 are used for this question. Number of flights for each day from 1998 to 2008 are plotted in the graph. There are 5 sudden jump in the graph, which indicates sudden increase or decrease around certain date. This might be related to the significant events happen around the given dates:
+
+* Label 1 indicates the sudden decrease happened in 2001-09-11, when 911 Attacks happened. People traveled by air less often, due to the fear toward terrorists. Label 2 and label 3 corresponding to Independence Day and Thanksgiving holidays. The demand for air travel mighte increase for the spare time during holidays. Label 4 indicates the sudden decrease around 2008-01-01. During that time, the new airplanes were created with larger capacity, resulted in the less flights needed. Label 5 indicates the sudden increase around 2001-09-11, when Los Angeles finished city constructions. The improvement of airport construction would results in larger capcity of flights.
 
     (b). Visualize and explain seasonal effects.
+```{r}
+    LAX.traffic.season <- flights_tbl %>% 
+      select(year, month, dayofmonth, origin, dest) %>%
+      filter(dest == "LAX" | origin == "LAX") %>% 
+      filter(year >= 1998 && year <= 2008) %>%
+      mutate(season = if_else(month %in% c(12, 1, 2), "winter", 
+                              if_else(month %in% c(3, 4, 5), "spring", 
+                                      if_else(month %in% c(6, 7, 8), "summer",
+                                              if_else(month %in% c(9, 10, 11), 
+                                                      "fall", "")
+                                              )
+                                      )
+                              )
+             ) %>%
+      group_by(year, season) %>%
+      summarise(n = n()) %>%
+      collect()
+    ggplot(LAX.traffic.season) +
+      geom_col(aes(x = as.factor(year), y = n, fill = season), 
+               position = "stack") +
+      labs(x = "Year", y = "Number of flights", 
+           title = "LAX air traffic by season from 1998 to 2008")
+```
+    
     
     
   
