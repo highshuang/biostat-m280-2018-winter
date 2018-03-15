@@ -16,6 +16,8 @@ if (!require("pacman"))
 library(pacman)
 p_load("sparklyr", "dplyr", "ggplot2", "ggmap", "maps", "mapdata",
        "devtools", "ggrepel", "lubridate", "RColorBrewer")
+
+library(ggrepel)
 ```
 
 Our Apache Yarn cluster hosts the [flights](http://stat-computing.org/dataexpo/2009/the-data.html) data representing 123 million flights over 22 years. Read the [lecture notes](http://hua-zhou.github.io/teaching/biostatm280-2018winter/slides/12-sparklyr/sparklyr-flights.html) on how to access the Yarn cluster. Connect to the database using `sparklyr` and answer following questions. You can base your answers on a specific year or the whole data set.
@@ -96,7 +98,7 @@ busy_numeric <- busy %>%
   
 # draw data on map
 # get usa map info    
-usa <- get_map(location = 'united states', zoom = 3)
+usa <- get_map(location = 'united states', zoom = 4)
 
     busiest.airport.mod <- busy %>%
       transmute(airport = airport, total.flights = numFlight, lat = as.numeric(lat), 
@@ -109,17 +111,20 @@ usa <- get_map(location = 'united states', zoom = 3)
         labs(x = "Longitude", y = "Latitude", 
              title = "Top 10 Busiest Airports in 2008") +
         geom_label_repel(data = busiest.airport.mod, 
-                         label = busiest.airport.mod$airport, size = 2)
+                         label = busiest.airport.mod$airport, size = 4)
 
 # print airport with dot size according to the numFlight
 ggmap(usa) + 
   geom_point(data = busy, aes(x = as.numeric(lon), y = as.numeric(lat), 
-                              size = numFlight), alpha = 0.7) +
+                              size = numFlight), alpha = 0.7, 
+             color = "yellow") +
   labs(x = "Longitude", 
        y = "Latitude", 
        title = "Top 10 Busiest Airports in 2008",
        subtitle = "Based on number of flights fly in and out") +
-  geom_label_repel(data = busy, label = busy$airport, size = 1)
+  coord_fixed(0.8) +
+  geom_label_repel(data = busy, label = busy$airport, 
+                   aes(x = as.numeric(lon), y = as.numeric(lat)), size = 3)
   
 ```
 
