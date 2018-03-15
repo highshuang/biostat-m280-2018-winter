@@ -79,9 +79,22 @@ busyair <- left_join(dest, origin, by = c("dest" == "origin")) %>%
   collect() %>%
   head(10)
 
-# get airport location info
+# get airport location info for first 10 busy airport 
 busyair_loc <- airports %>% filter(faa %in% busyair$airport) %>%
   collect()
+
+# combine top 10 airport with their location info
+busy <- left_join(busyair, busyair_loc, by = c("airport" == "faa"))
+
+# draw data on map
+usa <- map_data("usa") 
+ggplot() + 
+  geom_polygon(data = usa, 
+      aes(x = long, y = lat, group = group)) + 
+  coord_fixed(1.3) +
+  geom_point(data = position, aes(x = as.numeric(long),
+      y = as.numeric(lat), size = count), color = "red")
+
 
 
 
