@@ -136,9 +136,9 @@ ggmap(usa) +
 busyRoute <- flight_2008 %>% filter(!is.na(origin), !is.na(dest)) %>%
   group_by(origin, dest) %>%
   summarize(n = n()) %>%
-  collect() %>%
   arrange(desc(n)) %>%
-  slice(1:10)
+  collect() %>%
+  head(10)
 
 # get the origin info 
 ori_loc <- airports %>%
