@@ -365,17 +365,24 @@ model_data <- flights_tbl %>%
     filter(depdelay > 15 & depdelay < 240) %>%
     filter(arrdelay > -60 & arrdelay < 360) %>%
     filter(year >= 2003 & year <= 2007) %>%
-  
-  
-  model_data <- flights_tbl %>%
-    filter(!is.na(arrdelay) & !is.na(depdelay) & !is.na(distance)) %>%
-    filter(depdelay > 15 & depdelay < 240) %>%
-    filter(arrdelay > -60 & arrdelay < 360) %>%
-    filter(year >= 2003 & year <= 2007) %>%
     left_join(airlines_tbl, by = c("uniquecarrier" = "code")) %>%
-    mutate(gain = depdelay - arrdelay) %>%
-    select(year, month, arrdelay, depdelay, distance, uniquecarrier, description, gain)
-  
+    select(arrdelay, depdelay, distance, uniquecarrier, description) %>%
+  group_by(uniquecarrier) %>%
+  summarize(description = min(description), arrdelay = mean(arrdelay), 
+            distance = mean(distance), depdelay = mean(depdelay)) %>%
+  select(description, arrdelay, distance, depdelay) %>%
+  arrange(arrdelay) %>% collect()
+
+# Partition the data into training and validation sets
+model_partition <- model_data %>% 
+  sdf_partition(train = 0.8, valid = 0.2, seed = 5555)
+
+# Fit a linear model
+system.time(
+  ml1 <- model_partition$train %>%
+    ml_linear_regression(gain ~ distance + depdelay + uniquecarrier)
+)
+
 ```
 
     
