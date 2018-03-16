@@ -317,15 +317,20 @@ ggplot(data = week_LAX, aes(x = as.factor(dayofweek),
 (d). Map top 10 destinations from LAX. Size of dots should reflect the number of flights from LAX to that destination.
 
 ```{r}
-dest.from.LAX <- flights_tbl %>% 
-      select(year, origin, dest) %>%
-      filter(origin == "LAX" && year == 2007) %>%
-      group_by(dest) %>%
-      summarise(n = n()) %>% 
-      arrange(desc(n)) %>%
-      collect() %>%
-      head(10)
-    
+# find top 10 dest from LAX 
+route_LAX <- air_LAX %>%
+  filter(year == 2007) %>%
+  group_by(dest) %>%
+  summarize(n = n()) %>%
+  arrange(desc(n)) %>%
+  collect() %>%
+  head(10)
+
+dest_LAX_loc <- airports %>%
+  filter(faa %in% route_LAX$dest) %>% 
+   right_join(., route_LAX, by = c ("faa" = "dest"))
+
+
     dest.location <- airports_tbl %>%
       select(faa, lat, lon) %>%
       filter(faa %in% dest.from.LAX$dest) %>%
@@ -351,6 +356,7 @@ dest.from.LAX <- flights_tbl %>%
 5. Visualize and explain any other information you want to explore.
 
 ```{r}
+
 
 ```
 
