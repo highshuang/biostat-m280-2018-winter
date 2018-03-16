@@ -318,27 +318,38 @@ ggplot(data = week_LAX, aes(x = as.factor(dayofweek),
 
 ```{r}
 # find top 10 dest from LAX 
-route_LAX <- air_LAX %>%
-  filter(year == 2007) %>%
+route_LAX <- flight_2008 %>%
+  filter(origin == "LAX") %>%
   group_by(dest) %>%
   summarize(n = n()) %>%
   arrange(desc(n)) %>%
   collect() %>%
   head(10)
 
+# combine dest airport location info
 dest_LAX_loc <- airports %>%
   filter(faa %in% route_LAX$dest) %>% 
-   right_join(., route_LAX, by = c ("faa" = "dest"))
+  collect() %>%
+  left_join(route_LAX, by = c ("faa" = "dest")) %>%
+  transmute(
+    dest = dest,
+    lat = as.numeric(lat),
+    lon = as.numeric(lon)
+  )
 
+# print airport with dot size according to the numFlight
+ggmap(usa) + 
+  geom_point(data = busy, aes(x = as.numeric(lon), y = as.numeric(lat), 
+                              size = numFlight), alpha = 0.7, 
+             color = "yellow") +
+  labs(x = "Longitude", 
+       y = "Latitude", 
+       title = "Top 10 Busiest Airports in 2008",
+       subtitle = "Based on number of flights fly in and out") +
+  coord_fixed(0.8) +
+  geom_label_repel(data = busy, label = busy$airport, 
+                   aes(x = as.numeric(lon), y = as.numeric(lat)), size = 3)
 
-    dest.location <- airports_tbl %>%
-      select(faa, lat, lon) %>%
-      filter(faa %in% dest.from.LAX$dest) %>%
-      collect()
-    get.dest.l <- left_join(dest.from.LAX, dest.location, 
-                            by = c("dest" = "faa"))
-    get.dest.l$lat <- as.numeric(get.dest.l$lat)
-    get.dest.l$lon <- as.numeric(get.dest.l$lon)
     
     map3 <- get_map(location = 'united states', zoom = 4)
       ggmap(map3) + 
