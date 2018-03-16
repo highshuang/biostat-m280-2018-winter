@@ -326,43 +326,39 @@ route_LAX <- flight_2008 %>%
   collect() %>%
   head(10)
 
-# combine dest airport location info
+# get dest airport location info
 dest_LAX_loc <- airports %>%
-  filter(faa %in% route_LAX$dest) %>% 
-  collect() %>%
-  left_join(route_LAX, by = c ("faa" = "dest")) %>%
+  filter(faa %in% route_LAX$dest) %>%
+  collect()
+
+# combine dest info and location info
+dest_LAX_loc <- left_join(route_LAX, dest_LAX_loc, by = c("dest" = "faa")) %>%
   transmute(
     dest = dest,
     lat = as.numeric(lat),
-    lon = as.numeric(lon)
-  )
+    lon = as.numeric(lon),
+    numFlight = n
+  ) 
 
 # print airport with dot size according to the numFlight
 ggmap(usa) + 
-  geom_point(data = busy, aes(x = as.numeric(lon), y = as.numeric(lat), 
+  geom_point(data = dest_LAX_loc, aes(x = lon, y = lat, 
                               size = numFlight), alpha = 0.7, 
              color = "yellow") +
   labs(x = "Longitude", 
        y = "Latitude", 
-       title = "Top 10 Busiest Airports in 2008",
-       subtitle = "Based on number of flights fly in and out") +
+       title = "Top 10 destinations from LAX in 2008") +
   coord_fixed(0.8) +
-  geom_label_repel(data = busy, label = busy$airport, 
+  geom_label_repel(data = dest_LAX_loc, label = dest_LAX_loc$dest, 
                    aes(x = as.numeric(lon), y = as.numeric(lat)), size = 3)
 
-    
-    map3 <- get_map(location = 'united states', zoom = 4)
-      ggmap(map3) + 
-        geom_point(data = get.dest.l, aes(x = lon, y = lat, size = n), 
-                   alpha = 0.5) +
-        labs(x = "Longitude", y = "Latitude", 
-             title = "Top 10 destinations from LAX in 2007") +
-        geom_label_repel(data = get.dest.l, 
-                         label = get.dest.l$dest, size = 2)
 ```
 
+* Select flights from LAX in 2008. The top 10 popular destination flying from LAX are shown. The size of the dot reflects the number of flights from LAX to the destination. The top 10 destinations are SEA, OAK, SFO, SJC, LAS, SAN, PHX, DEN, ORD and JFK.
     
 4. Build a predictive model for the arrival delay (`arrdelay`) of flights flying from LAX. Use the same filtering criteria as in the [lecture notes](http://hua-zhou.github.io/teaching/biostatm280-2018winter/slides/12-sparklyr/sparklyr-flights.html) to construct training and validation sets. You are allowed to use a maximum of 5 predictors. The prediction performance of your model on the validation data set will be an important factor for grading this question.
+
+
     
 5. Visualize and explain any other information you want to explore.
 
