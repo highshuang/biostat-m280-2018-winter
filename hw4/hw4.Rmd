@@ -204,18 +204,22 @@ route_plot +
 * The top 10 busiest direct routes in the U.S. air are calculated by summarizing top 10 routes with the most number of flights in 2000. The above graph shows the 10 
 
 3. LAX:
-  
-    <p align="center">
-    ![](./lax-by-day-98-08.png)
-    </p>
+    
+```{r}
+# select flights in LAX from 1998 to 2008
+LAX <- flights_tbl %>%
+  filter(origin == "LAX" | dest == "LAX") %>%
+  filter(year <= 2008, year >= 1998) %>%
+  select(year, month, dayofmonth, dayofweek, origin, dest)
+
+```
+    
 
     (a). Reproduce above plot. Visualize and explain some prominent features you observe. For example, what happened at points 1-5?
     
 ```{r}
 # filter flights from 1998 to 2008 within LAX 
-air_LAX <- flights_tbl %>%
-  filter(origin == "LAX" | dest == "LAX") %>%
-  filter(year <= 2008, year >= 1998) %>%
+air_LAX <- LAX %>%
   select(year, month, dayofmonth, origin, dest) %>%
   group_by(year, month, dayofmonth) %>%
   summarize(n = n())  %>%
@@ -241,39 +245,103 @@ ggplot() +
 
 * The plot is reporduced above. The flights of LAX airport from 1998 to 2008 are used for this question. Number of flights for each day from 1998 to 2008 are plotted in the graph. There are 5 sudden jump in the graph, which indicates sudden increase or decrease around certain date. This might be related to the significant events happen around the given dates:
 
-* Label 1 indicates the sudden decrease happened in 2001-09-11, when 911 Attacks happened. People traveled by air less often, due to the fear toward terrorists. Label 2 and label 3 corresponding to Independence Day and Thanksgiving holidays. The demand for air travel mighte increase for the spare time during holidays. Label 4 indicates the sudden decrease around 2008-01-01. During that time, the new airplanes were created with larger capacity, resulted in the less flights needed. Label 5 indicates the sudden increase around 2001-09-11, when Los Angeles finished city constructions. The improvement of airport construction would results in larger capcity of flights.
+* Label 1 indicates the sudden decrease happened in 2001-09-11, when 911 Attacks happened. People traveled by air less often, due to the fear toward terrorists. Label 2 and label 3 corresponding to Independence Day and Thanksgiving holidays. In each year, there are similimar patterns in Noverber and July, which further indicates the relation between holiday and amount of flights. During Independence Day, most people have a day off, and don't need to travel for business. The demand for air travel might decrease. During Thanksgiving, people would rather stay with their family than travel around, which also decrease the need for air travel. Label 4 indicates the sudden decrease around 2008-01-01. Year before that was when Financial crisis of 2007-2008 happened. People would choose more affordable method to travel, instead of choosing by air. Label 5 indicates the sudden increase around 2001-09-11, when Los Angeles finished city constructions. The improvement of airport construction would results in larger capcity of flights.
 
     (b). Visualize and explain seasonal effects.
 ```{r}
-    LAX.traffic.season <- flights_tbl %>% 
-      select(year, month, dayofmonth, origin, dest) %>%
-      filter(dest == "LAX" | origin == "LAX") %>% 
-      filter(year >= 1998 && year <= 2008) %>%
-      mutate(season = if_else(month %in% c(12, 1, 2), "winter", 
-                              if_else(month %in% c(3, 4, 5), "spring", 
-                                      if_else(month %in% c(6, 7, 8), "summer",
-                                              if_else(month %in% c(9, 10, 11), 
-                                                      "fall", "")
-                                              )
-                                      )
-                              )
-             ) %>%
-      group_by(year, season) %>%
-      summarise(n = n()) %>%
-      collect()
-    ggplot(LAX.traffic.season) +
-      geom_col(aes(x = as.factor(year), y = n, fill = season), 
-               position = "stack") +
-      labs(x = "Year", y = "Number of flights", 
-           title = "LAX air traffic by season from 1998 to 2008")
+# separate data set 
+season_LAX <- LAX %>%
+  select(year, month, origin, dest) %>%
+  group_by(year, month) %>%
+  mutate(season = if_else(month %in% c(3, 4, 5), "Spring",
+                          if_else(month %in% c(6, 7, 8), "summer",
+                                  if_else(month %in% c(9, 10, 11), 
+                                          "fall", "winter")))) %>%
+  group_by(year, season) %>%
+  summarize(n = n()) %>%
+  collect()
+
+# plot the number of flights according to seasons each year
+ggplot(data = season_LAX, aes(x = as.factor(season), 
+                              y = n, colour = as.factor(year),
+                              group = as.factor(year))) +
+  geom_line() +
+  geom_point() +
+  labs(
+    x = "season",
+    y = "number of flights",
+    title = "LAX air traffic for four seasons from 1998 to 2008"
+  ) +
+  scale_colour_discrete(name = "year") 
 ```
-    
-    
-    
+
+* Select LAX flights data from 1998 to 2008. Based on month, a new variable, season, is created. Plot reflects the number of flights for four seasons in each year is shown above. In general, the number of flights achieved the maximun during summer time, and reached minimum during winter. Possible explanation is the long summer vacation encouraged students to travel during summer, and both Christmas time and low temperature in winter made peopel stay with their family rather than travel.
+
+(c). Visualize and explain weekly effects.
+```{r}
+week_LAX <- LAX %>% select(year, dayofweek, origin, dest) %>%
+  group_by(year, dayofweek) %>%
+  summarize(n = n()) %>%
+  collect()
+
+# plot the ratio of flights for weekday in each year
+ggplot() +
+  geom_col(data = week_LAX, aes(x = as.factor(year),
+                                y = n, fill = as.factor(dayofweek)), 
+           position = "dodge") +
+  labs(
+    x = "Year",
+    y = "Ratio of flights",
+    title = "LAX air traffic with weekday effect from 1998 to 2008"
+  ) 
+
+# plot the number of flights according to weekday in each year
+ggplot(data = week_LAX, aes(x = as.factor(dayofweek), 
+                              y = n, colour = as.factor(year),
+                              group = as.factor(year))) +
+  geom_line() +
+  geom_point() +
+  labs(
+    x = "weekday",
+    y = "number of flights",
+    title = "LAX air traffic for four seasons from 1998 to 2008"
+  ) +
+  scale_colour_discrete(name = "year") 
+          
+```
+
   
-    (c). Visualize and explain weekly effects.
-  
-    (d). Map top 10 destinations from LAX. Size of dots should reflect the number of flights from LAX to that destination.
+(d). Map top 10 destinations from LAX. Size of dots should reflect the number of flights from LAX to that destination.
+
+```{r}
+dest.from.LAX <- flights_tbl %>% 
+      select(year, origin, dest) %>%
+      filter(origin == "LAX" && year == 2007) %>%
+      group_by(dest) %>%
+      summarise(n = n()) %>% 
+      arrange(desc(n)) %>%
+      collect() %>%
+      head(10)
+    
+    dest.location <- airports_tbl %>%
+      select(faa, lat, lon) %>%
+      filter(faa %in% dest.from.LAX$dest) %>%
+      collect()
+    get.dest.l <- left_join(dest.from.LAX, dest.location, 
+                            by = c("dest" = "faa"))
+    get.dest.l$lat <- as.numeric(get.dest.l$lat)
+    get.dest.l$lon <- as.numeric(get.dest.l$lon)
+    
+    map3 <- get_map(location = 'united states', zoom = 4)
+      ggmap(map3) + 
+        geom_point(data = get.dest.l, aes(x = lon, y = lat, size = n), 
+                   alpha = 0.5) +
+        labs(x = "Longitude", y = "Latitude", 
+             title = "Top 10 destinations from LAX in 2007") +
+        geom_label_repel(data = get.dest.l, 
+                         label = get.dest.l$dest, size = 2)
+```
+
     
 4. Build a predictive model for the arrival delay (`arrdelay`) of flights flying from LAX. Use the same filtering criteria as in the [lecture notes](http://hua-zhou.github.io/teaching/biostatm280-2018winter/slides/12-sparklyr/sparklyr-flights.html) to construct training and validation sets. You are allowed to use a maximum of 5 predictors. The prediction performance of your model on the validation data set will be an important factor for grading this question.
     
