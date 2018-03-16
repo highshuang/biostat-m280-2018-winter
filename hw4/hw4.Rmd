@@ -496,7 +496,9 @@ ggplot(carrier, aes(arrdelay, prediction)) +
 5. Visualize and explain any other information you want to explore.
 
 ```{r}
-air_ATL <- flight_2008 %>% filter(origin == "ATL") %>%
+# select all flights depart from Atlanta
+air_ATL <- flight_2008 %>% filter(origin == "ATL") 
+
 
 
 ```
