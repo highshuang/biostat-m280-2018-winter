@@ -366,26 +366,83 @@ model_data <- flights_tbl %>%
     filter(arrdelay > -60 & arrdelay < 360) %>%
     filter(year >= 2003 & year <= 2007) %>%
     left_join(airlines_tbl, by = c("uniquecarrier" = "code")) %>%
-    select(arrdelay, depdelay, distance, uniquecarrier, description) %>%
+    select(arrdelay, depdelay, distance, uniquecarrier, description) 
+
+
+model_data %>%
   group_by(uniquecarrier) %>%
   summarize(description = min(description), arrdelay = mean(arrdelay), 
             distance = mean(distance), depdelay = mean(depdelay)) %>%
-  select(description, arrdelay, distance, depdelay) %>%
-  arrange(arrdelay) %>% collect()
+  select(description, distance, arrdelay, depdelay) %>%
+  arrange(arrdelay) 
 
 # Partition the data into training and validation sets
 model_partition <- model_data %>% 
   sdf_partition(train = 0.8, valid = 0.2, seed = 5555)
 
 # Fit a linear model
-system.time(
-  ml1 <- model_partition$train %>%
-    ml_linear_regression(gain ~ distance + depdelay + uniquecarrier)
-)
+ml1 <- model_partition$train %>%
+  ml_linear_regression(arrdelay ~ distance + depdelay + uniquecarrier)
+
+# Summarize the linear model
+summary(ml1)
+
 
 ```
 
-    
+  
+```{r}
+### model performance
+# Calculate average arrdelay by predicted decile
+model_deciles <- lapply(model_partition, function(x) {
+  sdf_predict(ml1, x) %>%
+    mutate(decile = ntile(desc(prediction), 10)) %>%
+    group_by(decile) %>%
+    summarize(arrdelay = mean(arrdelay)) %>%
+    select(decile, arrdelay) %>%
+    collect()
+  })
+
+# create summay data set for plotting
+data.frame(data = 'train', model_deciles$train),
+data.frame(data = 'valid', model_deciles$valid),
+make.row.names = FALSE
+
+# Plot average gains by predicted decile
+deciles %>%
+  ggplot(aes(factor(decile), arrdelay, fill = data)) +
+  geom_bar(stat = 'identity', position = 'dodge') +
+  labs(title = 'Average arrdelay by predicted decile', x = 'Decile', y = 'Minutes')
+
+```
+  
+  
+```{r}
+### Visulization prediction
+# Select data from an out of time sample
+data_2008 <- flights_tbl %>%
+  filter(!is.na(arrdelay) & !is.na(depdelay) & !is.na(distance)) %>%
+  filter(depdelay > 15 & depdelay < 240) %>%
+  filter(arrdelay > -60 & arrdelay < 360) %>%
+  filter(year == 2008) %>%
+  left_join(airlines_tbl, by = c("uniquecarrier" = "code")) %>%
+  select(year, month, arrdelay, depdelay, distance, uniquecarrier, description,
+         origin, dest) 
+
+carrier <- sdf_predict(ml1, data_2008) %>%
+  group_by(description) %>%
+  summarize(arrdelay = mean(arrdelay), prediction = mean(prediction), freq = n()) %>%
+  filter(freq > 100) %>%
+  collect()
+
+# Plot actual gains and predicted gains by airline carrier
+ggplot(carrier, aes(arrdelay, prediction)) + 
+  geom_point(alpha = 0.75, color = 'red', shape = 3) +
+  geom_abline(intercept = 0, slope = 1, alpha = 0.15, color = 'blue') +
+  geom_text(aes(label = substr(description, 1, 20)), size = 3, alpha = 0.75, vjust = -1) +
+  labs(title='Average arrdelay Forecast', x = 'Actual', y = 'Predicted')
+```
+
 5. Visualize and explain any other information you want to explore.
 
 ```{r}
