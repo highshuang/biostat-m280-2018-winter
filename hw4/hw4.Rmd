@@ -7,7 +7,8 @@ output: html_document
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-#knitr::opts_chunk$set(eval = TRUE, cache = TRUE)
+#knitr::opts_chunk$set(cache = TRUE)
+
 # show scientific digits to 40
 options(scipen = 40)
 if (!require("pacman"))
@@ -372,16 +373,6 @@ model_data <- flights_tbl %>%
     left_join(airlines_tbl, by = c("uniquecarrier" = "code")) %>%
     select(arrdelay, depdelay, distance, uniquecarrier, description) 
 
-
-model_data %>%
-  group_by(uniquecarrier) %>%
-  summarize(description = min(description, na.rm = NA), 
-            arrdelay = mean(arrdelay, na.rm = NA), 
-            distance = mean(distance, na.rm = NA), 
-            depdelay = mean(depdelay, na.rm = NA)) %>%
-  select(description, distance, arrdelay, depdelay) %>%
-  arrange(arrdelay) 
-
 # Partition the data into training and validation sets
 model_partition <- model_data %>% 
   sdf_partition(train = 0.8, valid = 0.2, seed = 5555)
@@ -396,7 +387,7 @@ summary(ml1)
 # fit in validation data and check mse 313.683	
 result_valid <- sdf_predict(ml1, model_partition$valid) %>%
   mutate(residual = arrdelay - prediction) %>%
-  summarize(mse = mean(residual^2))
+  summarize(mse = mean(residual^2, na.rm = TRUE))
 
 result_valid$mse
 
@@ -405,7 +396,7 @@ result_valid$mse
 
 
 
-* Model data is randmonly devided into 80% traning set and 20% validation set. Regress arrival delay on departure delay, distance, and carrier. From the reported summary for the linear model, R^2 is 0.8447, which reflects that most of the variation in arrdelay can be explained by distance, departure delay and carrier difference. The root mean squared error is 17.74, which is relatively small. Fitting the validation data to the linear model, the mean square error is 326.51, which is relativly small. This shows that the linear model also explains the validation data well.
+* Model data is randmonly devided into 80% traning set and 20% validation set. Regress arrival delay on departure delay, distance, and carrier. From the reported summary for the linear model, R^2 is 0.833, which reflects that most of the variation in arrdelay can be explained by distance, departure delay and carrier difference. The root mean squared error is 17.74, which is relatively small. Fitting the validation data to the linear model, the mean square error is 326.51, which is relativly small. This shows that the linear model also explains the validation data well.
   
   
 ```{r}
@@ -415,7 +406,7 @@ model_deciles <- lapply(model_partition, function(x) {
   sdf_predict(ml1, x) %>%
     mutate(decile = ntile(desc(prediction), 10)) %>%
     group_by(decile) %>%
-    summarize(arrdelay = mean(arrdelay, na.rm = NA)) %>%
+    summarize(arrdelay = mean(arrdelay, na.rm = TRUE)) %>%
     select(decile, arrdelay) %>%
     collect()
   })
@@ -431,7 +422,8 @@ deciles <- rbind(
 deciles %>%
   ggplot(aes(factor(decile), arrdelay, fill = data)) +
   geom_bar(stat = 'identity', position = 'dodge') +
-  labs(title = 'Average arrdelay by predicted decile', x = 'Decile', y = 'Minutes')
+  labs(title = 'Average arrdelay by predicted decile', x = 'Decile', 
+       y = 'Minutes')
 
 ```
   
@@ -441,7 +433,8 @@ deciles %>%
 ### Visulization prediction
 # Select data from an out of time sample
 data_2008 <- flights_tbl %>%
-  filter(!is.na(arrdelay) & !is.na(depdelay) & !is.na(distance)) %>%
+  filter(!is.na(arrdelay) & !is.na(depdelay) & !is.na(distance)
+         & origin == "LAX") %>%
   filter(depdelay > 15 & depdelay < 240) %>%
   filter(arrdelay > -60 & arrdelay < 360) %>%
   filter(year == 2008) %>%
@@ -493,10 +486,6 @@ ggplot(data = air_ATL, aes(x = as.factor(str_sub(description, 1, 15)),
     y = "number of flights",
     title = "Top 10 carriers in ATL airport in 2008") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
-
-
-
-
 
 ```
 
