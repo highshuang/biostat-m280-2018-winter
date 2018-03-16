@@ -275,7 +275,7 @@ ggplot(data = season_LAX, aes(x = as.factor(season),
   scale_colour_discrete(name = "year") 
 ```
 
-* Select LAX flights data from 1998 to 2008. Based on month, a new variable, season, is created. Plot reflects the number of flights for four seasons in each year is shown above. In general, the number of flights achieved the maximun during summer time, and reached minimum during winter. Possible explanation is the long summer vacation encouraged students to travel during summer, and both Christmas time and low temperature in winter made peopel stay with their family rather than travel.
+* Select LAX flights data from 1998 to 2008. Based on month, a new variable, season, is created. The above plot reflects the number of flights for four seasons in each year. In general, the number of flights achieved the maximun during summer time, and reached minimum during winter. Possible explanation is the long summer vacation encouraged students to travel during summer, and both Christmas time and low temperature in winter made peopel stay with their family rather than travel.
 
 (c). Visualize and explain weekly effects.
 ```{r}
@@ -304,13 +304,19 @@ ggplot(data = week_LAX, aes(x = as.factor(dayofweek),
   labs(
     x = "weekday",
     y = "number of flights",
-    title = "LAX air traffic for four seasons from 1998 to 2008"
+    title = "LAX air traffic for weekday from 1998 to 2008"
   ) +
   scale_colour_discrete(name = "year") 
           
 ```
 
-  
+* Select LAX flights data from 1998 to 2008. The above plot reflects the number of flights for seven weekdays in each year. The data from 1998 to 2008 reveal the similar pattern for relation between weekday and number of flights. Saturdays had least number of flights. From Monday to Friday, there were high demands for flights, but between these five weekdays, there are not significant difference. 
+
+Saturday might sound like a popular — hence expensive — day to fly. But in truth, most travelers prefer to come back from vacation on Sunday to maximize their time away
+
+
+In general, the number of flights achieved the maximun during summer time, and reached minimum during winter. Possible explanation is the long summer vacation encouraged students to travel during summer, and both Christmas time and low temperature in winter made peopel stay with their family rather than travel.
+
 (d). Map top 10 destinations from LAX. Size of dots should reflect the number of flights from LAX to that destination.
 
 ```{r}
