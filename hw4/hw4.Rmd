@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 # show scientific digits to 40
 options(scipen = 40)
 if (!require("pacman"))
@@ -310,12 +310,9 @@ ggplot(data = week_LAX, aes(x = as.factor(dayofweek),
           
 ```
 
-* Select LAX flights data from 1998 to 2008. The above plot reflects the number of flights for seven weekdays in each year. The data from 1998 to 2008 reveal the similar pattern for relation between weekday and number of flights. Saturdays had least number of flights. From Monday to Friday, there were high demands for flights, but between these five weekdays, there are not significant difference. 
+* Select LAX flights data from 1998 to 2008. The above plot reflects the number of flights for seven weekdays in each year. The data from 1998 to 2008 reveal the similar pattern for relation between weekday and number of flights. Saturdays had least number of flights. Possible explanation: most travelers prefer to come back from vacation on Sunday to maximize their time away, thus choosing Sarturday would not be a good idea. Also, during Saturdays, people don't need to travel for business.
+* From Monday to Friday, there were high demands for flights, but between these five weekdays, there are not significant difference. Possible explanation: people need to travel for business during weekdays.  
 
-Saturday might sound like a popular — hence expensive — day to fly. But in truth, most travelers prefer to come back from vacation on Sunday to maximize their time away
-
-
-In general, the number of flights achieved the maximun during summer time, and reached minimum during winter. Possible explanation is the long summer vacation encouraged students to travel during summer, and both Christmas time and low temperature in winter made peopel stay with their family rather than travel.
 
 (d). Map top 10 destinations from LAX. Size of dots should reflect the number of flights from LAX to that destination.
 
