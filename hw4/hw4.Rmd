@@ -387,6 +387,38 @@ ml1 <- model_partition$train %>%
 # Summarize the linear model
 summary(ml1)
 
+```
+
+
+```{r}
+# filter model data
+model_data <- flights_tbl %>%
+    filter(!is.na(arrdelay) & !is.na(depdelay) & !is.na(distance)) %>%
+    filter(depdelay > 15 & depdelay < 240) %>%
+    filter(arrdelay > -60 & arrdelay < 360) %>%
+    filter(year >= 2003 & year <= 2007) %>%
+    left_join(airlines_tbl, by = c("uniquecarrier" = "code")) %>%
+    select(arrdelay, depdelay, distance, uniquecarrier, description) 
+
+
+model_data %>%
+  group_by(uniquecarrier) %>%
+  summarize(description = min(description), arrdelay = mean(arrdelay), 
+            distance = mean(distance), depdelay = mean(depdelay)) %>%
+  select(description, distance, arrdelay, depdelay) %>%
+  arrange(arrdelay) 
+
+# Partition the data into training and validation sets
+model_partition <- model_data %>% 
+  sdf_partition(train = 0.8, valid = 0.2, seed = 5555)
+
+# Fit a linear model
+ml1 <- model_partition$train %>%
+  ml_linear_regression(arrdelay ~ distance + depdelay + uniquecarrier)
+
+# Summarize the linear model
+summary(ml1)
+
 ### model performance
 # Calculate average arrdelay by predicted decile
 model_deciles <- lapply(model_partition, function(x) {
@@ -498,26 +530,23 @@ ggplot(carrier, aes(arrdelay, prediction)) +
 
 ```{r}
 # top 10 popular carriers for filghts origin at Atlanta
-air_ATL <- flights_tbl %>% filter(origin == "ATL", year <= 2008,
-                                  year >= 1998) %>%
+air_ATL <- flight_2008 %>% filter(origin == "ATL") %>%
   left_join(airlines_tbl, by = c("uniquecarrier" = "code")) %>%
-  group_by(uniquecarrier) %>%
+  select(year, description, uniquecarrier, origin, dest) %>%
+  group_by(description) %>%
   summarize(n = n()) %>% 
   collect() %>%
-  head(10)
+  head(10) 
 
 # plot the number of flights according to weekday in each year
-ggplot(data = air_ATL, aes(x = as.factor(uniquecarrier), 
-                              y = n, colour = as.factor(year),
-                              group = as.factor(year))) +
-  geom_line() +
-  geom_point() +
+ggplot(data = air_ATL, aes(x = as.factor(str_sub(description, 1, 15)), 
+                              y = n)) +
+  geom_col()  +
   labs(
     x = "Carrier",
     y = "number of flights",
-    title = "Top 10 carriers in ATL airport from 1998 to 2008"
-  ) +
-  scale_colour_discrete(name = "year") 
+    title = "Top 10 carriers in ATL airport in 2008") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 
 
@@ -525,4 +554,4 @@ ggplot(data = air_ATL, aes(x = as.factor(uniquecarrier),
 
 ```
 
-*.
+* Using flight data in 2008, flights origin from Atlanta are selected. The top 10 popular airline carriers are shown by the bar chart.
