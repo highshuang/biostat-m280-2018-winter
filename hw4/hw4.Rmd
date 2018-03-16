@@ -434,10 +434,11 @@ ggplot(carrier, aes(arrdelay, prediction)) +
   geom_abline(intercept = 0, slope = 1, alpha = 0.15, color = 'blue') +
   geom_text(aes(label = substr(description, 1, 20)), size = 3, alpha = 0.75, vjust = -1) +
   labs(title='Average arrdelay Forecast', x = 'Actual', y = 'Predicted')
+
 ```
 
 
-```
+
 * Model data is randmonly devided into 80% traning set and 20% validation set. Regress arrival delay on departure delay, distance, and carrier. From the reported summary for the linear model, R^2 is 0.8447, which reflects that most of the variation in arrdelay can be explained by distance, departure delay and carrier difference. The root mean squared error is 17.74, which is relatively small.
   
   
@@ -496,11 +497,32 @@ ggplot(carrier, aes(arrdelay, prediction)) +
 5. Visualize and explain any other information you want to explore.
 
 ```{r}
-# select all flights depart from Atlanta
-air_ATL <- flight_2008 %>% filter(origin == "ATL") 
+# top 10 popular carriers for filghts origin at Atlanta
+air_ATL <- flights_tbl %>% filter(origin == "ATL", year <= 2008,
+                                  year >= 1998) %>%
+  left_join(airlines_tbl, by = c("uniquecarrier" = "code")) %>%
+  group_by(uniquecarrier) %>%
+  summarize(n = n()) %>% 
+  collect() %>%
+  head(10)
+
+# plot the number of flights according to weekday in each year
+ggplot(data = air_ATL, aes(x = as.factor(uniquecarrier), 
+                              y = n, colour = as.factor(year),
+                              group = as.factor(year))) +
+  geom_line() +
+  geom_point() +
+  labs(
+    x = "Carrier",
+    y = "number of flights",
+    title = "Top 10 carriers in ATL airport from 1998 to 2008"
+  ) +
+  scale_colour_discrete(name = "year") 
+
+
 
 
 
 ```
 
-  
+*.
