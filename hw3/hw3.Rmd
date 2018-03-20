@@ -1,0 +1,412 @@
+---
+title: "m280 homework3"
+author: "Shuang Gao"
+date: "2018/2/28"
+output: html_document
+---
+    ```{r setup, include=FALSE}
+    knitr::opts_chunk$set(echo = TRUE)
+    
+    ```
+
+
+    ```{r}
+    if (!"DBI" %in% rownames(installed.packages()))  
+          install.packages("DBI", repos = "http://cran.rstudio.com/")
+    if (!"RSQLite" %in% rownames(installed.packages()))  
+          install.packages("RSQLite", repos = "http://cran.rstudio.com/") 
+    if (!"tidyverse" %in% rownames(installed.packages()))  
+          install.packages("tidyverse", repos = "http://cran.rstudio.com/")
+    if (!"dplyr" %in% rownames(installed.packages()))  
+          install.packages("dplyr", repos = "http://cran.rstudio.com/")
+    suppressMessages(library("DBI"))
+    suppressMessages(library("RSQLite"))
+    suppressMessages(library("tidyverse"))
+    suppressMessages(library("dplyr"))
+    ```
+
+## Q1 LA City Employee Payroll
+
+The `/home/m280-data/la_payroll/LA_City_Employee_Payroll.csv` file on teaching server contains payroll information of LA City employees in years 2013-2017. It was downloaded from [LA City Controller's Office](https://controllerdata.lacity.org/Payroll/City-Employee-Payroll/pazn-qyym). Make a Shiny app to facilitate exploratory data analysis. 
+
+1. For efficiency of the Shiny app, you should first pre-process, pare down, tidy, and save the data, e.g., as a compressed RDS file, to be used in the app.
+```{r}
+# import data 
+payroll <- read_csv("/home/m280-data/la_payroll/LA_City_Employee_Payroll.csv")
+```
+
+
+    ```{r, results = "hide", comment=FALSE, warning=FALSE}
+    
+    # fix column names (replace space by underscore)
+    names(payroll) <- str_replace_all(names(payroll), " ", "_")
+    
+    # change "Other_Pay_(Payroll_Explorer) to otherPay
+    names(payroll)[24] <- "otherPay"
+    
+    # select target variables
+    payroll_small <- payroll %>%
+      transmute(year = Year, department = Department_Title,
+                job = Job_Class_Title,
+                totalPay = abs(as.numeric(substr(Total_Payments, 2, 
+                                                 length(Total_Payments)))),
+                basePay = abs(as.numeric(substr(Base_Pay, 2, 
+                                                length(Base_Pay)))),
+                overtimePay = abs(as.numeric(substr(Overtime_Pay, 2, 
+                                                    length(Overtime_Pay)))),  
+                otherPay = abs(as.numeric(substr(otherPay, 2, 
+                                                 length(otherPay)))),
+                totalCost = abs(as.numeric(substr(Average_Benefit_Cost, 2, 
+                                                  length(Average_Benefit_Cost)))
+                                )
+      )
+    
+    # convert payroll_small to rds file 
+    wd <- getwd()
+    path <- paste0(wd, "/shinyapp/payroll.rds")
+    saveRDS(payroll_small, path)
+    ```
+
+* First, the rows with missing values are removed from the data for calculation convenience. Then, only the columns for our interests are selected to form a subset. For pay and cost related columns, the values are stored in character type with dollar sign and there are negative values, which are not meaningful. Because there are extremly negative values like -13042, it might be the typo about the sign. Thus, all the negative values are changed to absolute values. Then the subset is converted to rds file for later use in the shiny app.
+
+2. **Total payroll by LA City**. Visualize the total LA City payroll of each year, with breakdown into base pay, overtime pay, and other pay.
+
+    ```{r}
+    
+    # check the totalPay = overtimePay + basePay + otherPay assumption
+    payroll_small %>% count()
+    
+    payroll_small %>% filter(totalPay == overtimePay + basePay + otherPay) %>%
+      count()
+    
+    ```
+
+
+* In this dataset, the total pay is not always equal to sum of base pay, overtime pay and other pay. Try select only rows fulfilling this relation. Before filtering with this criterion, there are 297293 rows in the data set. After filtering, there are 167223 rows left. Almost half of the data are removed. Thus, it is not a good choice to only select the rows satisfying the criterion. In order to visualize the total LA City payroll of each year, annual total base pay, annual total overtime pay, and annual total other pay are stacked in a bar chart to reflect the annual total pay. The bar chart is shown under thea tab "total payroll plot".
+
+3. **Who earned most?** Visualize the payroll information (total payment with breakdown into base pay, overtime pay, and other pay, Department, Job Title) of the top $n$ highest paid LA City employees in a specific year. User specifies $n$ (default 10) and year (default 2017).
+
+* The table with default 10 highest paid LA City employess in 2017 is shown under the tab "Individual Earn Most".
+
+4. **Which departments earn most?** Visualize the mean or median payroll, with breakdown into base pay, overtime pay, and other pay, of top $n$ earning departments. User specifies $n$ (default 5), year (default 2017), and method (mean or median, default median).
+
+* The table with default top 5 earning departments in 2017 based on median total Pay ranking is shown under the tab "Department Earn Most".
+
+5. **Which departments cost most?** Visualize the total payroll, with breakdown into base pay, overtime pay, and other pay, of top $n$ expensive departments. User specifies $n$ (default 5) and year (default 2017).
+
+* The table with default top 5 departments with most cost in 2017 based on total cost sum ranking is shown under tab "Department Cost Most".
+
+6. Visualize any other information you are interested in.
+
+* On the side panel, users can type in any job (default Police Commander) they are interested in its annual salary distribution (default 2017) with or without density curve (default with curve). The plot is shown under tab "Dist for Annual Job salary".
+
+7. Publish your Shiny app to <https://www.shinyapps.io> and share the link.
+
+* [link to shinyapp.](https://highshuang.shinyapps.io/shinyapp/)
+
+## Q2 LA City Parking War
+
+The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on teaching server contains information about parking tickets in LA City. It was downloaded from [LA Open Data Portal](https://data.lacity.org/A-Well-Run-City/Parking-Citations/wjz9-h9np). Connect to the database and answer following questions using plots and summary statistics. In this exercise, you are **not** allowed to load whole data into memory. Use the _transform in database, plot in R_ strategy.
+
+```{r}
+# read in data from database
+db <- dbConnect(RSQLite::SQLite(),
+                "/home/m280-data/la_parking/LA_Parking_Citations_Extra.sqlite")
+<<<<<<< HEAD
+    
+# save latix to R
+latix <- dplyr::tbl(db, "latix")
+    
+=======
+        
+# save latix to R
+latix <- dplyr::tbl(db, "latix")
+        
+>>>>>>> develop
+    ```
+
+1. How many tickets are in this data set? Which time period do these tickets span? Which years have most data?
+
+    ```{r}
+    # total ticket amount: 4044338
+    latix %>% filter(!is.na(Ticket_number)) %>% 
+      count()
+    
+    ```
+
+* In total, there are 4044338 tickets in this data set, after removing the missing values. 
+    ```{r}
+    # remove missing dates
+    date <- latix %>% filter(!is.na(Issue_Year), !is.na(Issue_Month), 
+                             !is.na(Issue_Day), !is.na(Issue_Wday), 
+                             !is.na(Issue_Hour))
+    
+    date %>% distinct(Issue_Year, Issue_Month, Issue_Day, Issue_Hour,
+                      Issue_Minute) %>%
+      arrange(desc(Issue_Year), desc(Issue_Month), desc(Issue_Day),
+              desc(Issue_Hour), desc(Issue_Minute)) %>% collect() %>%
+      slice(c(1, n()))
+    ```
+
+* Tickets span from 2010/04/27 21:40 to 2017/12/30 1:41.
+
+    ```{r}
+    date  %>% group_by(Issue_Year) %>%
+      summarize(count = n()) %>% arrange(desc(count)) %>% 
+      head(n = 1)
+    
+    date  %>% group_by(Issue_Year) %>%
+      summarize(count = n()) %>% arrange(desc(count)) %>% collect() %>%
+      ggplot(aes(x = Issue_Year, y = count)) +
+      scale_x_continuous(breaks = seq(2010, 2017, by = 1)) +
+      geom_bar(stat="identity", fill = "aliceblue", color = "black") +
+      labs(
+        x = "Year",
+        y = "number of tickets",
+        title = "bar chart for tickets issued each year"
+      )
+    
+    
+    
+    ```
+
+* Year 2015 has the most data. The bar chart also support the conclusion.
+
+
+2. When (which hour, weekday, month day, and month) are you most likely to get a ticket and when are you least likely to get a ticket?
+    ```{r}
+    # hour that most/least likey to get a ticket 
+    date %>% group_by(Issue_Hour) %>%
+      summarize(count = n()) %>% arrange(desc(count)) %>% 
+      collect() %>%
+      slice(c(1, n()))
+    
+    date %>% group_by(Issue_Hour) %>%
+      summarize(count = n()) %>% arrange(desc(count)) %>% 
+      collect() %>%
+      ggplot(aes(x = Issue_Hour, y = count)) +
+      scale_x_continuous(breaks = seq(1, 23, by = 1)) +
+      geom_bar(stat="identity", fill = "aliceblue", color = "black") +
+      labs(
+        x = "Hour",
+        y = "number of tickets",
+        title = "bar chart for tickets issued each hour"
+      )
+    
+    ```
+
+* In the noon (hour = 12), it is most likely to get a ticket. During 5 a.m.(hour = 5), it is leastly likely to get a ticket. The bar chart supports the conclusion.
+
+
+    ```{r}
+    # weekday that most/least likey to get a ticket 
+    date %>% group_by(Issue_Wday) %>%
+      summarize(count = n()) %>% arrange(desc(count)) %>% 
+      collect() %>%
+      slice(c(1, n()))
+    
+    date %>% group_by(Issue_Wday) %>%
+      summarize(count = n()) %>% arrange(desc(count)) %>% 
+      collect() %>%
+      ggplot(aes(x = Issue_Wday, y = count)) +
+      scale_x_continuous(breaks = seq(1, 7, by = 1)) +
+      geom_bar(stat="identity", fill = "aliceblue", color = "black") +
+      labs(
+        x = "Weekday",
+        y = "number of tickets",
+        title = "bar chart for tickets issued each weekday"
+      )
+    
+    
+    
+    
+    ```
+
+* It is most likely to get a ticket on Tuesday(weekday=3) and least likely to get a ticket on Saturday(weekday=7). The bar chart also supports the conclusion.
+
+    ```{r}
+    # month day that most/least likey to get a ticket 
+    date %>% group_by(Issue_Day) %>%
+      summarize(count = n()) %>% arrange(desc(count)) %>% 
+      collect() %>%
+      slice(c(1, n()))
+    
+    
+    date %>% group_by(Issue_Day) %>%
+      summarize(count = n()) %>% arrange(desc(count)) %>% 
+      collect() %>%
+      ggplot(aes(x = Issue_Day, y = count)) +
+      scale_x_continuous(breaks = seq(1, 31, by = 1)) +
+      coord_cartesian(ylim = c(100000, 150000)) +
+      geom_bar(stat="identity", fill = "aliceblue", color = "black") +
+      labs(
+        x = "Month Day",
+        y = "number of tickets",
+        title = "bar chart for tickets issued each month day"
+      )
+    
+
+    ```
+
+* It is most likely to get a ticket on 22 and least likely to get a ticket on 31. The bar chart also supports the conclusion.
+
+    ```{r}
+    # month that most/least likey to get a ticket 
+    date %>% group_by(Issue_Month) %>%
+      summarize(count = n()) %>% arrange(desc(count)) %>% 
+      collect() %>%
+      slice(c(1, n()))
+    
+    date %>% group_by(Issue_Month) %>%
+      summarize(count = n()) %>% arrange(desc(count)) %>% 
+      collect() %>%
+      ggplot(aes(x = Issue_Month, y = count)) +
+      scale_x_continuous(breaks = seq(1, 12, by = 1)) +
+      coord_cartesian(ylim = c(174000, 400000)) + 
+      geom_bar(stat="identity", fill = "aliceblue", color = "black") +
+      labs(
+        x = "Month",
+        y = "number of tickets",
+        title = "bar chart for tickets issued each month"
+      )
+      
+    ```
+
+* It is most likely to get a ticket in March and least likely to get a ticket in November. The bar plot also supports the conclusion.
+
+
+3. Which car makes received most citations?
+    ```{r}
+    latix %>% group_by(Make) %>%
+      summarize(count = n()) %>%
+      arrange(desc(count)) %>% collect() %>%
+      head(n = 1)
+    
+    latix %>% group_by(Make) %>%
+      summarize(count = n()) %>%
+      arrange(desc(count)) %>% collect() %>%
+      head() %>%
+      ggplot(aes(x = Make, y = count)) +
+      geom_bar(stat="identity", fill = "aliceblue", color = "black") +
+      labs(
+        x = "Car brand",
+        y = "number of tickets",
+        title = "bar chart for tickets issued for different car brand",
+        subtitle = "top 10 brands"
+      )
+      
+    ```
+
+* TOYT makes received most citations (669548 citations). The bar chart also supports the conclusion.
+
+4. How many different colors of cars were ticketed? Which color attracted most tickets?
+    ```{r}
+    latix %>% filter(!is.na(Color)) %>%
+      distinct(Color) %>%
+      count()
+    ```
+
+* There are 65 different colors of cars were ticketed.
+    ```{r, comment=FALSE, warning=FALSE}
+    latix %>% group_by(Color) %>%
+      summarize(count = n()) %>%
+      arrange(desc(count)) %>% collect() %>%
+      head(n = 1)
+
+    latix %>% group_by(Color) %>%
+      summarize(count = n()) %>%
+      arrange(desc(count)) %>% collect() %>%
+      head(n = 10) %>%
+      ggplot(aes(x = Color, y = count)) +
+      geom_bar(stat="identity", fill = "aliceblue", color = "black") +
+      labs(
+        x = "Color",
+        y = "number of tickets",
+        title = "bar chart for tickets issued for cars with different color",
+        subtitle = "top 10 colors"
+      )
+      
+    
+    
+    ```
+
+* Color black(BK) attracted most tickets.The bar chart also supports the conclusion.
+
+5. What are the most common ticket types?
+    ```{r, comment=FALSE, warning=FALSE}
+    latix %>% group_by(Violation_Description) %>%
+      summarize(count = n()) %>% 
+      arrange(desc(count)) %>% collect() %>%
+      head(n = 3)
+    
+    latix %>% group_by(Violation_Description) %>%
+      summarize(count = n()) %>% 
+      arrange(desc(count)) %>% collect() %>%
+      head(n = 10) %>%
+      ggplot(aes(x = Violation_Description, y = count)) +
+      geom_bar(stat="identity", fill = "aliceblue", color = "black") +
+      labs(
+        x = "violation descripition",
+        y = "number of tickets",
+        title = "bar chart for tickets issued for types of violation",
+        subtitle = "top 10 violation descripition"
+      ) +
+      coord_flip()
+      
+    ```
+
+* "NO PARK/STREET CLEAN"," "METER EXP" and "PREFERENTIAL PARKING" are the most common three ticket types. The bar chart also supports the conclusion.
+
+6. How much money was collected on parking tickets in 2015 and 2016?
+    ```{r}
+    latix %>% select(Issue_Year, Fine_amount) %>%
+      filter(Issue_Year == 2015 | Issue_Year == 2016) %>%
+      group_by(Issue_Year) %>%
+      summarize(sum = sum(Fine_amount, na.rm = TRUE))
+    
+    latix %>% select(Issue_Year, Fine_amount) %>%
+      filter(Issue_Year == 2015 | Issue_Year == 2016) %>%
+      summarize(total = sum(Fine_amount), na.rm = TRUE)
+    
+    ```
+
+* 151006794$ was collected on parking ticket in 2015 and 123236136$ was collected on the parking ticket in 2016. 274242930$ was collected in both 2015 and 2016.
+
+7. Visualize any other information you are interested in.
+    ```{r, comment=FALSE, warning=FALSE}
+    data <- latix %>% filter(Issue_Year == 2017, !is.na(Fine_amount), 
+                             !is.na(RP_State_Plate)) %>% 
+      select(RP_State_Plate, Fine_amount) %>% 
+      group_by(RP_State_Plate) %>%
+      summarize(sumFine = sum(Fine_amount, na.rm = TRUE)) %>% 
+      arrange(desc(sumFine)) %>%
+      collect() %>%
+      slice(2:11) 
+        
+    head(data, n = 10)
+    ```
+
+
+
+    ```{r, comment=FALSE, warning=FALSE}
+    ggplot(data, aes(x = RP_State_Plate, y = sumFine)) +
+    geom_col(fill = "aliceblue", color = "black") +
+    labs(
+          title = "2017 LA City Parking Ticket Fine from out-of-state vehicles",
+          subtitle = "top 10 total fine contributring states",
+          y = "Total Fine ($)",
+          x = "State"
+          )
+    
+    ```
+
+* For the 2017 LA city parking ticket fine, I am curious vehicles from which state other than california contribute to the total fine most. The top 10 states with the most fine in 2017 are reflected in the bar chart above.
+
+
+
+
+
+
+
+
+
